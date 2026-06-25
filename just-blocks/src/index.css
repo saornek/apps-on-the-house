@@ -1,0 +1,226 @@
+/* Just Blocks — game styles. Built on tokens.css (warm terracotta on cream). */
+
+:root {
+  --tcell: clamp(15px, 4.2vw, 22px); /* tray block size */
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game {
+  width: min(94vw, 460px);
+  padding: clamp(12px, 4vw, 24px) 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  user-select: none;
+}
+
+/* ---- Header ---- */
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.brand-name {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+.brand-by {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.scores {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.score-box {
+  text-align: right;
+  min-width: 48px;
+}
+.score-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+.score-value {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--color-ink);
+}
+.restart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.restart:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ---- Board ---- */
+.board-wrap {
+  position: relative;
+  width: 100%;
+  background: var(--color-panel);
+  padding: 6px;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  gap: 0;
+  touch-action: none;
+}
+.cell {
+  background: var(--color-bg);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--color-panel);
+}
+.cell.filled {
+  box-shadow: inset 0 0 0 2px var(--color-panel), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+.cell.ghost {
+  opacity: 0.45;
+}
+.cell.ghost.bad {
+  background: #c0392b !important;
+  opacity: 0.35;
+}
+.cell.flash {
+  animation: flashClear 420ms ease-out forwards;
+  z-index: 2;
+}
+@keyframes flashClear {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  35% {
+    transform: scale(1.16);
+    filter: brightness(1.85);
+  }
+  100% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+}
+
+/* ---- Game over overlay ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 27, 25, 0.45);
+  border-radius: 16px;
+}
+.overlay-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+.overlay-card h2 {
+  margin: 0 0 6px;
+}
+.overlay-card p {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.overlay-card strong {
+  color: var(--color-ink);
+}
+
+/* ---- Tray ---- */
+.tray {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tray-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(88px, 26vw, 110px); /* fixed, so the row never shifts between piece sets */
+  background: var(--color-panel);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  box-sizing: border-box;
+}
+.tray-piece {
+  display: grid;
+  gap: 2px;
+  cursor: grab;
+  touch-action: none;
+}
+.tray-piece:active {
+  cursor: grabbing;
+}
+
+/* piece blocks (tray + floating) */
+.pblock {
+  border-radius: 5px;
+}
+.pblock.empty {
+  background: transparent;
+}
+.tray-piece .pblock:not(.empty) {
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* ---- Floating drag piece ---- */
+.floating {
+  position: fixed;
+  z-index: 100;
+  display: grid;
+  gap: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+.floating .pblock:not(.empty) {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12), inset 0 -3px 0 rgba(0, 0, 0, 0.14);
+}
+
+/* ---- Hint ---- */
+.hint {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}

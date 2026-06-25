@@ -16,17 +16,33 @@ no in-app purchases. Anything a game saves stays on your device.
 - **Local-only** — no servers, no accounts. Saved data lives on your device, with an
   export/import option so you never lose it.
 
+## Games
+
+### Just Blocks
+
+A calm block puzzle (in the *1010!* / *Block Blast* style). Drag the three tray pieces
+onto an 8×8 grid; fill a full row or column to clear it. No falling pieces — play at
+your own pace. It's game over when none of your pieces fit. Tracks a local best score,
+works with mouse and touch, and installs as an offline PWA.
+
+```bash
+cd just-blocks
+npm install
+npm run dev      # play locally with hot reload
+npm run build    # production build into dist/
+```
+
+*More games to come.*
+
 ## Repo layout
 
 Each game lives in its own folder:
 
 ```
-<game-name>/        A self-contained game
+just-blocks/        A block puzzle
 README.md           This file
 LICENSE             GNU GPLv3
 ```
-
-*(The first game will be added here in Phase 1.)*
 
 ## Contributing
 
