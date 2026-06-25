@@ -15,6 +15,19 @@ body {
   display: flex;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Every interactive game surface (and its children) must not initiate a
+   touch-scroll on iOS, or dragging a piece scrolls the page. */
+.board,
+.board .cell,
+.tray,
+.tray-piece,
+.tray-piece .pblock,
+.floating,
+.floating .pblock {
+  touch-action: none;
 }
 
 .game {

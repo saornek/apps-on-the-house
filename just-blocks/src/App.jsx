@@ -52,16 +52,40 @@ function variants(base) {
   }
   return [...seen.values()]
 }
-const POOL = BASE_SHAPES.flatMap(variants)
-
 const dims = (shape) => ({
   rows: Math.max(...shape.map((c) => c[0])) + 1,
   cols: Math.max(...shape.map((c) => c[1])) + 1,
 })
+
+// How often each base shape is drawn. The chunky symmetric pieces are rarer:
+// 1x1 is the rarest, then 3x3, then 2x2; everything else is normal weight.
+function weightFor(shape) {
+  const { rows, cols } = dims(shape)
+  const n = shape.length
+  if (n === 1) return 0.12 // 1x1 — really rare
+  if (rows === 3 && cols === 3 && n === 9) return 0.25 // 3x3
+  if (rows === 2 && cols === 2 && n === 4) return 0.5 // 2x2
+  return 1
+}
+
+// Group rotations by base shape, each with a draw weight. We pick a base by weight
+// (so the symmetric chunky pieces stay rare), then a random rotation of it.
+const SHAPES = BASE_SHAPES.map((b) => ({ variants: variants(b), weight: weightFor(b) }))
+const POOL = SHAPES.flatMap((s) => s.variants)
+const TOTAL_WEIGHT = SHAPES.reduce((sum, s) => sum + s.weight, 0)
+const randomShape = () => {
+  let r = Math.random() * TOTAL_WEIGHT
+  for (const s of SHAPES) {
+    r -= s.weight
+    if (r <= 0) return s.variants[(Math.random() * s.variants.length) | 0]
+  }
+  const last = SHAPES[SHAPES.length - 1]
+  return last.variants[(Math.random() * last.variants.length) | 0]
+}
 const uid = () => Math.random().toString(36).slice(2)
 const randomPiece = () => ({
   id: uid(),
-  shape: POOL[(Math.random() * POOL.length) | 0],
+  shape: randomShape(),
   color: COLORS[(Math.random() * COLORS.length) | 0],
 })
 const newTray = () => [randomPiece(), randomPiece(), randomPiece()]
@@ -104,6 +128,40 @@ function anyFits(board, pieces) {
         if (canPlace(board, p.shape, r, c)) return true
   }
   return false
+}
+
+// Can this single shape be placed anywhere on the board?
+function shapeFits(board, shape) {
+  for (let r = 0; r < SIZE; r++)
+    for (let c = 0; c < SIZE; c++)
+      if (canPlace(board, shape, r, c)) return true
+  return false
+}
+
+// Is there any piece in the whole pool that could fit? (false => genuine game over)
+function boardHasRoom(board) {
+  return POOL.some((shape) => shapeFits(board, shape))
+}
+
+// Deal a tray of 3 such that at least one piece fits the given board, so a fresh
+// deal never instantly ends a still-playable game. If the board is truly jammed
+// (no pool piece fits anywhere), return a normal random tray and let it be game over.
+function trayForBoard(board) {
+  if (!boardHasRoom(board)) return newTray()
+  for (let i = 0; i < 40; i++) {
+    const t = [randomPiece(), randomPiece(), randomPiece()]
+    if (t.some((p) => shapeFits(board, p.shape))) return t
+  }
+  // Fallback: force one guaranteed-fitting piece into a random slot.
+  const fitting = POOL.filter((shape) => shapeFits(board, shape))
+  const forced = {
+    id: uid(),
+    shape: fitting[(Math.random() * fitting.length) | 0],
+    color: COLORS[(Math.random() * COLORS.length) | 0],
+  }
+  const t = [randomPiece(), randomPiece(), randomPiece()]
+  t[(Math.random() * 3) | 0] = forced
+  return t
 }
 
 export default function App() {
@@ -158,10 +216,19 @@ export default function App() {
     const lines = fullRows.length + fullCols.length
     const gained = piece.shape.length + (lines > 0 ? lines * lines * 10 : 0)
 
-    // Refill the tray slot (and reset the tray if all three are used).
+    // Board after any clears — computed now so a tray refill can be checked against it.
+    let cleared = placed
+    if (lines > 0) {
+      cleared = placed.map((row) => row.slice())
+      for (const r of fullRows) for (let c = 0; c < SIZE; c++) cleared[r][c] = null
+      for (const c of fullCols) for (let r = 0; r < SIZE; r++) cleared[r][c] = null
+    }
+
+    // Refill the tray when all three are used — dealing a set where at least one
+    // piece fits the resulting board (so a fresh deal never instantly ends the game).
     let t = trayR.current.slice()
     t[index] = null
-    if (t.every((x) => !x)) t = newTray()
+    if (t.every((x) => !x)) t = trayForBoard(cleared)
 
     setScore((s) => s + gained)
     setTray(t)
@@ -175,10 +242,7 @@ export default function App() {
     for (const c of fullCols) for (let r = 0; r < SIZE; r++) flashSet.add(r * SIZE + c)
     setFlash(flashSet)
     window.setTimeout(() => {
-      const b2 = placed.map((row) => row.slice())
-      for (const r of fullRows) for (let c = 0; c < SIZE; c++) b2[r][c] = null
-      for (const c of fullCols) for (let r = 0; r < SIZE; r++) b2[r][c] = null
-      setBoard(b2)
+      setBoard(cleared)
       setFlash(new Set())
     }, 440)
   }
@@ -214,11 +278,17 @@ export default function App() {
         return null
       })
     }
+    // Block iOS Safari from scrolling the page while a piece is being dragged.
+    const blockTouch = (e) => {
+      if (e.cancelable) e.preventDefault()
+    }
     window.addEventListener('pointermove', move, { passive: false })
+    window.addEventListener('touchmove', blockTouch, { passive: false })
     window.addEventListener('pointerup', end)
     window.addEventListener('pointercancel', end)
     return () => {
       window.removeEventListener('pointermove', move)
+      window.removeEventListener('touchmove', blockTouch)
       window.removeEventListener('pointerup', end)
       window.removeEventListener('pointercancel', end)
     }
