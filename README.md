@@ -44,6 +44,38 @@ README.md           This file
 LICENSE             GNU GPLv3
 ```
 
+## Build & publish
+
+Each game is its own self-contained **Vite** app — its own `package.json`, build, and PWA
+(manifest + service worker + icons). Build any game on its own with:
+
+```bash
+cd <game>
+npm install
+npm run build    # → <game>/dist/
+```
+
+**How games get published to the site:** this repo is pulled into the private website repo
+as a **git submodule** (at `website/games/`). The website is the single deploy; its build
+builds each game here and serves it at **`appsonthehouse…/games/<name>/`**. There is **no
+separate deploy per game** — the website bundles them all.
+
+To publish a change to a game:
+
+1. Commit & push it here (the games repo).
+2. In the **website** repo, bump the submodule pointer and redeploy:
+   ```bash
+   git submodule update --remote games
+   git add games && git commit -m "Update games" && git push
+   ```
+
+### Adding a new game
+
+1. Create a new folder here (e.g. `my-game/`) as a Vite app.
+2. Set Vite **`base: './'`** so its assets resolve under `/games/my-game/`.
+3. Push here, then bump the submodule pointer in the website (as above).
+4. Add it to the website's Games page list. That's it — no new deploy.
+
 ## Contributing
 
 This is a small, for-fun project, but issues and pull requests are welcome. The one
