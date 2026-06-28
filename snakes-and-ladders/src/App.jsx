@@ -62,7 +62,8 @@ const LEVELS = [
   { id: 'hard', label: 'Hard', blurb: 'A snake pit 🐍' },
 ]
 
-const PLAYERS = { you: 'You', cpu: 'Computer' }
+const PLAYERS_CPU = { you: 'You', cpu: 'Computer' }
+const PLAYERS_2P  = { you: 'Player 1', cpu: 'Player 2' }
 
 function cellCenter(n) {
   const r = Math.floor((n - 1) / 10)
@@ -162,6 +163,7 @@ function Ladder({ a, b }) {
 
 export default function App() {
   const [screen, setScreen] = useState('setup')
+  const [mode, setMode] = useState('cpu')   // 'cpu' | '2p'
   const [level, setLevel] = useState('medium')
   const [youChar, setYouChar] = useState('coffee')
   const [cpuChar, setCpuChar] = useState('cat')
@@ -173,6 +175,8 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [winner, setWinner] = useState(null)
   const [message, setMessage] = useState('Your turn — tap Roll.')
+
+  const modeRef = useRef(mode); modeRef.current = mode
 
   const boardRef = useRef(board); boardRef.current = board
   const posRef = useRef(pos); posRef.current = pos
@@ -199,7 +203,7 @@ export default function App() {
     setRolling(false)
     setBusy(false)
     setWinner(null)
-    setMessage('Your turn — tap Roll.')
+    setMessage(modeRef.current === '2p' ? 'Player 1\'s turn — tap Roll.' : 'Your turn — tap Roll.')
     setScreen('play')
   }
 
@@ -224,7 +228,8 @@ export default function App() {
   }
 
   function applyRoll(player, roll) {
-    const who = PLAYERS[player]
+    const players = modeRef.current === '2p' ? PLAYERS_2P : PLAYERS_CPU
+    const who = players[player]
     const start = posRef.current[player]
     let dest = start + roll
     if (dest > 100) {
@@ -238,7 +243,7 @@ export default function App() {
       const jump = boardRef.current[dest]
       if (jump) {
         const climbed = jump > dest
-        setMessage(`${who} ${climbed ? 'climbed a ladder 🪜' : 'slid down a snake 🐍'} to ${jump}.`)
+        setMessage(`${who} ${climbed ? 'climbed a ladder' : 'slid down a snake'} to ${jump}.`)
         setPlayerPos(player, jump)
         dest = jump
       }
@@ -257,8 +262,13 @@ export default function App() {
   function endTurn(player) {
     const next = player === 'you' ? 'cpu' : 'you'
     setTurn(next); setBusy(false); busyRef.current = false
-    if (next === 'you') setMessage('Your turn — tap Roll.')
-    else {
+    if (modeRef.current === '2p') {
+      // Pass-and-play: both players roll manually
+      const label = next === 'you' ? 'Player 1' : 'Player 2'
+      setMessage(`${label}'s turn — tap Roll.`)
+    } else if (next === 'you') {
+      setMessage('Your turn — tap Roll.')
+    } else {
       setMessage('Computer is rolling…')
       later(() => takeTurn('cpu'), 750)
     }
@@ -276,8 +286,28 @@ export default function App() {
         </header>
 
         <div className="setup">
-          <Picker title="You play as" value={youChar} player="you" onPick={setYouChar} />
-          <Picker title="Computer plays as" value={cpuChar} player="cpu" onPick={setCpuChar} />
+          <div className="setup-block">
+            <span className="setup-title">Mode</span>
+            <div className="levels">
+              <button
+                className={'level-card' + (mode === 'cpu' ? ' active' : '')}
+                onClick={() => setMode('cpu')}
+              >
+                <span className="level-label">vs Computer</span>
+                <span className="level-blurb">Play alone</span>
+              </button>
+              <button
+                className={'level-card' + (mode === '2p' ? ' active' : '')}
+                onClick={() => setMode('2p')}
+              >
+                <span className="level-label">2 Players</span>
+                <span className="level-blurb">Pass &amp; play</span>
+              </button>
+            </div>
+          </div>
+
+          <Picker title={mode === '2p' ? 'Player 1 plays as' : 'You play as'} value={youChar} player="you" onPick={setYouChar} />
+          <Picker title={mode === '2p' ? 'Player 2 plays as' : 'Computer plays as'} value={cpuChar} player="cpu" onPick={setCpuChar} />
 
           <div className="setup-block">
             <span className="setup-title">Difficulty</span>
@@ -311,12 +341,12 @@ export default function App() {
         <div className="vs">
           <span className={'vs-side' + (turn === 'you' ? ' on' : '')}>
             <Token charId={youChar} player="you" className="chip" />
-            You
+            {mode === '2p' ? 'Player 1' : 'You'}
           </span>
           <span className="vs-x">vs</span>
           <span className={'vs-side' + (turn === 'cpu' ? ' on' : '')}>
             <Token charId={cpuChar} player="cpu" className="chip" />
-            Computer
+            {mode === '2p' ? 'Player 2' : 'Computer'}
           </span>
         </div>
         <button className="restart" onClick={() => setScreen('setup')} aria-label="New game">
@@ -365,8 +395,8 @@ export default function App() {
           <Die value={die} rolling={rolling} />
           <button
             className="btn btn-primary roll-btn"
-            onClick={() => takeTurn('you')}
-            disabled={busy || winner || turn !== 'you'}
+            onClick={() => takeTurn(turn)}
+            disabled={busy || winner || (mode === 'cpu' && turn !== 'you')}
           >
             Roll
           </button>
@@ -377,8 +407,16 @@ export default function App() {
         <div className="overlay-modal">
           <div className="overlay-card">
             <Token charId={winner === 'you' ? youChar : cpuChar} player={winner} className="big" />
-            <h2>{winner === 'you' ? 'You win! 🎉' : 'Computer wins'}</h2>
-            <p>{winner === 'you' ? 'Nice rolling.' : 'So close — go again?'}</p>
+            <h2>
+              {mode === '2p'
+                ? (winner === 'you' ? 'Player 1 wins! 🎉' : 'Player 2 wins! 🎉')
+                : (winner === 'you' ? 'You win! 🎉' : 'Computer wins')}
+            </h2>
+            <p>
+              {mode === '2p'
+                ? 'Great game — go again?'
+                : (winner === 'you' ? 'Nice rolling.' : 'So close — go again?')}
+            </p>
             <div className="overlay-actions">
               <button className="btn btn-primary" onClick={startGame}>Play again</button>
               <button className="btn btn-outline" onClick={() => setScreen('setup')}>
