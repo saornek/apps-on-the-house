@@ -1,0 +1,16 @@
+{
+  "name": "Snakes & Ladders",
+  "short_name": "Snakes & Ladders",
+  "description": "A fair, classic Snakes & Ladders vs the computer. Free, no ads, works offline. From Apps On The House.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F2EA",
+  "theme_color": "#C2693E",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

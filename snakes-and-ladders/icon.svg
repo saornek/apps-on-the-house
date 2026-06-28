@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#F6F2EA"/>
+  <!-- ladder (blue) -->
+  <g stroke="#5B7A99" stroke-width="22" stroke-linecap="round" fill="none">
+    <line x1="150" y1="430" x2="150" y2="110"/>
+    <line x1="210" y1="430" x2="210" y2="110"/>
+    <line x1="150" y1="170" x2="210" y2="170"/>
+    <line x1="150" y1="240" x2="210" y2="240"/>
+    <line x1="150" y1="310" x2="210" y2="310"/>
+    <line x1="150" y1="380" x2="210" y2="380"/>
+  </g>
+  <!-- snake (terracotta) -->
+  <path d="M360 120 C300 175 420 240 355 300 C300 350 410 405 355 440"
+        stroke="#C2693E" stroke-width="26" stroke-linecap="round" fill="none"/>
+  <circle cx="360" cy="120" r="20" fill="#C2693E"/>
+  <circle cx="354" cy="115" r="4" fill="#F6F2EA"/>
+  <circle cx="367" cy="115" r="4" fill="#F6F2EA"/>
+</svg>
