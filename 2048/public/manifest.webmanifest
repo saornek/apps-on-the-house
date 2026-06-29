@@ -1,0 +1,14 @@
+{
+  "name": "2048",
+  "short_name": "2048",
+  "description": "Classic 2048. Free, no ads, works offline. From Apps On The House.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F2EA",
+  "theme_color": "#C2693E",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

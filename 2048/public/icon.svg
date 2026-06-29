@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="2048">
+  <rect width="512" height="512" rx="96" fill="#F6F2EA"/>
+  <rect x="54" y="54" width="404" height="404" rx="54" fill="#EBE4D6"/>
+  <rect x="86" y="86" width="340" height="340" rx="38" fill="#C2693E"/>
+  <path d="M86 385h340v18c0 21-17 38-38 38H124c-21 0-38-17-38-38v-18Z" fill="#A9572F" opacity=".55"/>
+  <text
+    x="256"
+    y="286"
+    text-anchor="middle"
+    font-family="Fraunces, Georgia, serif"
+    font-size="126"
+    font-weight="700"
+    fill="#FFF8EF"
+  >2048</text>
+</svg>
