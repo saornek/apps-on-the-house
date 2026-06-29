@@ -1,0 +1,15 @@
+{
+  "name": "Shape Crash",
+  "short_name": "Shape Crash",
+  "description": "An endless, score-based match-3 with cute geometric blocks. Free, no ads, works offline. From Apps On The House.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F2EA",
+  "theme_color": "#C2693E",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

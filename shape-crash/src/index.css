@@ -1,0 +1,439 @@
+/* ==========================================================================
+   Shape Crash — layout, tiles, animations, iOS hardening. Built on tokens.css.
+   ========================================================================== */
+
+/* --- iOS hardening -----------------------------------------------------
+   The whole page disables text selection / the long-press callout (no
+   magnifier), and the viewport meta blocks zoom. Page scrolling stays on so
+   the rules section can expand; the BOARD itself blocks scroll/drag via
+   touch-action:none + a touchmove preventDefault (see App.jsx). --------- */
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+}
+
+.game {
+  width: min(96vw, 500px);
+  box-sizing: border-box;
+  padding: max(env(safe-area-inset-top), 18px) 0 max(env(safe-area-inset-bottom), 28px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 3vh, 18px);
+}
+
+/* --- Header ------------------------------------------------------------- */
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+
+.brand-by {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.scores {
+  display: flex;
+  gap: 8px;
+}
+
+.score-pill {
+  background: var(--color-surface);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  padding: 5px 14px;
+  text-align: center;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.score-val {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+
+.score-pill.best .score-val {
+  color: var(--color-accent);
+}
+
+/* --- Board -------------------------------------------------------------- */
+.board-wrap {
+  background: var(--color-panel);
+  padding: 8px;
+  border-radius: 20px;
+}
+
+.board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.cells {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.sq {
+  background: var(--color-surface);
+}
+
+.sq--alt {
+  background: #f6f1e8;
+}
+
+.tiles {
+  position: absolute;
+  inset: 0;
+}
+
+/* Tiles are positioned by percent so that a change in (r,c) animates as a
+   slide (swap) or a fall (gravity) via the top/left transition. */
+.tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  transition: top 0.26s cubic-bezier(0.3, 0.9, 0.4, 1), left 0.18s ease,
+    transform 0.12s ease;
+}
+
+.tile .shape {
+  width: 84%;
+  height: 84%;
+  filter: drop-shadow(0 2px 1px rgba(28, 27, 25, 0.18));
+  pointer-events: none;
+}
+
+.tile.selected {
+  z-index: 4;
+  transform: scale(1.08);
+}
+
+.tile.selected .shape {
+  filter: drop-shadow(0 0 6px rgba(194, 105, 62, 0.85));
+}
+
+/* Highlight: cells a special is about to clear flash with a warm glow. */
+.tile.highlight {
+  z-index: 3;
+  border-radius: var(--radius-md);
+  background: radial-gradient(circle, rgba(255, 221, 138, 0.9), rgba(255, 221, 138, 0) 72%);
+  animation: hi-pulse 0.32s ease-in-out;
+}
+
+.tile.highlight .shape {
+  filter: drop-shadow(0 0 7px rgba(255, 246, 214, 0.98));
+}
+
+@keyframes hi-pulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+/* Pop: matched tiles scale away. */
+.tile.clearing {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Drop-in: new tiles fall from above as they appear. */
+@keyframes drop-in {
+  0% { transform: translateY(-80%); opacity: 0; }
+  70% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.tile.appear .shape {
+  animation: drop-in 0.3s cubic-bezier(0.3, 0.9, 0.4, 1);
+}
+
+/* Specials get a soft glow. */
+.shape-special {
+  animation: glow 1.6s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.6)); }
+  50% { filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.95)); }
+}
+
+/* --- Controls (bottom-left shuffle) ------------------------------------- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.shuffle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--color-accent-hover), 0 5px 12px rgba(194, 105, 62, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+  touch-action: manipulation;
+}
+
+.shuffle-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.shuffle-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--color-accent-hover), 0 2px 6px rgba(194, 105, 62, 0.3);
+}
+
+.shuffle-btn:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  box-shadow: 0 3px 0 #cbc2b1;
+  cursor: default;
+}
+
+.shuffle-count {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.shuffle-count b {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--color-accent);
+}
+
+.help-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: var(--border-hair);
+  border-radius: var(--radius-pill, 999px);
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.help-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* --- Game over ---------------------------------------------------------- */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 27, 25, 0.45);
+  padding: 24px;
+  z-index: 20;
+}
+
+.overlay-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  max-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.overlay-card h2 {
+  margin: 0;
+}
+
+.final-score {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-3xl);
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+
+.overlay-card p {
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.overlay-card .btn {
+  padding: 12px 28px;
+  font-size: var(--text-base);
+}
+
+/* --- Rules popup -------------------------------------------------------- */
+.rules-card {
+  position: relative;
+  text-align: left;
+  align-items: stretch;
+  max-width: 380px;
+  max-height: min(80vh, 640px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.rules-card h2 {
+  text-align: left;
+  padding-right: 28px;
+}
+
+.close-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-panel);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.close-x:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
+.rules-body {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  line-height: var(--leading-normal);
+}
+
+.rules-body p {
+  margin: 0 0 var(--space-3);
+}
+
+.rules-body b {
+  color: var(--color-ink);
+  font-weight: var(--weight-semibold);
+}
+
+.rules-body h3 {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.specials {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.specials li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.specials .ex {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+}
+
+.specials .ex .shape {
+  width: 30px;
+  height: 30px;
+}
+
+.rules-inline-icon {
+  display: inline-flex;
+  vertical-align: -3px;
+  margin: 0 4px;
+  color: var(--color-accent);
+}

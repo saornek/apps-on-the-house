@@ -29,4 +29,5 @@ Thumbs.db
 !.env.example
 
 # Docs
-ideas.md
+/docs
+.claude
