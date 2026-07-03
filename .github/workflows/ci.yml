@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        game: [just-blocks, 2048, shape-crash, capybara-jump, snakes-and-ladders]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install
+        working-directory: ${{ matrix.game }}
+        run: npm install
+
+      - name: Build
+        working-directory: ${{ matrix.game }}
+        run: npm run build
+
+      - name: Test
+        working-directory: ${{ matrix.game }}
+        run: npm test --if-present
