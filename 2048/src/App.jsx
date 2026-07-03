@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ArrowLeft, RotateCcw } from 'lucide-react'
 import { addRandomTile, createInitialBoard, hasWon, isLost, moveBoard } from './board.js'
 
 const BEST_KEY = '2048:best'
@@ -143,7 +143,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">2048</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <ScoreBox label="Score" value={score} />

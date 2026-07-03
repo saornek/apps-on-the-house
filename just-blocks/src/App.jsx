@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ArrowLeft, RotateCcw } from 'lucide-react'
 
 const SIZE = 8
 const BEST_KEY = 'just-blocks:best'
@@ -320,7 +320,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">Just Blocks</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <div className="score-box">

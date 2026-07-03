@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RotateCcw, HelpCircle, X } from 'lucide-react'
+import { ArrowLeft, RotateCcw, HelpCircle, X } from 'lucide-react'
 import Shape from './shapes.jsx'
 import {
   ROWS,
@@ -285,7 +285,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">Shape Crash</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <div className="score-pill">

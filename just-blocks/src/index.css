@@ -58,8 +58,16 @@ body {
   color: var(--color-ink);
 }
 .brand-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+  text-decoration: none;
+}
+.brand-by:hover,
+.brand-by:focus-visible {
+  color: var(--color-ink);
 }
 .scores {
   display: flex;

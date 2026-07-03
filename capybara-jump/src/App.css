@@ -60,8 +60,16 @@ button {
 }
 
 .brand-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--color-text-muted);
   font-size: var(--text-xs);
+  text-decoration: none;
+}
+.brand-by:hover,
+.brand-by:focus-visible {
+  color: var(--color-ink);
 }
 
 .score-pill {

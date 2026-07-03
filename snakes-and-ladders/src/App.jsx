@@ -281,7 +281,9 @@ export default function App() {
         <header className="game-head">
           <div className="brand">
             <span className="brand-name">Snakes &amp; Ladders</span>
-            <span className="brand-by">Apps On The House</span>
+            <a className="brand-by" href="/">
+              <ArrowLeft size={11} /> Apps On The House
+            </a>
           </div>
         </header>
 
