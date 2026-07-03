@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, RotateCcw } from 'lucide-react'
+import ShareButton from './ShareButton.jsx'
 
 const SIZE = 8
 const BEST_KEY = 'just-blocks:best'
@@ -368,9 +369,12 @@ export default function App() {
                 Score <strong>{score}</strong>
                 {score >= best && score > 0 ? ' — new best!' : ` · best ${best}`}
               </p>
-              <button className="btn btn-primary" onClick={restart}>
-                Play again
-              </button>
+              <div className="overlay-actions">
+                <button className="btn btn-primary" onClick={restart}>
+                  Play again
+                </button>
+                <ShareButton text={`I scored ${score} in Just Blocks — play free at Apps On The House!`} />
+              </div>
             </div>
           </div>
         )}

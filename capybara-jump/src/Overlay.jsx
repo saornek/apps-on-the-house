@@ -4,6 +4,8 @@
  * Licensed under the GNU General Public License v3.0 or later.
  */
 
+import ShareButton from './ShareButton.jsx'
+
 export default function Overlay({ phase, score, highScore }) {
   if (phase === 'idle') {
     return (
@@ -26,6 +28,9 @@ export default function Overlay({ phase, score, highScore }) {
           <p className="overlay-best">
             Best: <span>{highScore}</span>
           </p>
+          <div className="overlay-actions" onPointerDown={(event) => event.stopPropagation()}>
+            <ShareButton text={`I scored ${score} in Capybara Jump — play free at Apps On The House!`} />
+          </div>
           <p className="overlay-hint">Tap anywhere to restart</p>
         </div>
       </div>

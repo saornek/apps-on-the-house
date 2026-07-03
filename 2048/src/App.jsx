@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, RotateCcw } from 'lucide-react'
 import { addRandomTile, createInitialBoard, hasWon, isLost, moveBoard } from './board.js'
+import ShareButton from './ShareButton.jsx'
 
 const BEST_KEY = '2048:best'
 const SWIPE_MIN = 28
@@ -187,6 +188,7 @@ export default function App() {
                     <button className="btn btn-outline" type="button" onClick={startNewGame}>
                       New game
                     </button>
+                    <ShareButton text={`I hit 2048 (score: ${score}) — play free at Apps On The House!`} />
                   </div>
                 </>
               ) : (
@@ -195,9 +197,12 @@ export default function App() {
                   <p>
                     Score <strong>{score}</strong>
                   </p>
-                  <button className="btn btn-primary" type="button" onClick={startNewGame}>
-                    New game
-                  </button>
+                  <div className="overlay-actions">
+                    <button className="btn btn-primary" type="button" onClick={startNewGame}>
+                      New game
+                    </button>
+                    <ShareButton text={`I scored ${score} in 2048 — play free at Apps On The House!`} />
+                  </div>
                 </>
               )}
             </div>

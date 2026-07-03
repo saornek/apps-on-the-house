@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, RotateCcw, HelpCircle, X } from 'lucide-react'
 import Shape from './shapes.jsx'
+import ShareButton from './ShareButton.jsx'
 import {
   ROWS,
   COLS,
@@ -412,9 +413,12 @@ export default function App() {
             {newBest && <span className="badge">★ New best score</span>}
             <div className="final-score">{score.toLocaleString()}</div>
             <p>Best: {highScore.toLocaleString()}</p>
-            <button className="btn btn-primary" onClick={restart}>
-              Play again
-            </button>
+            <div className="overlay-actions">
+              <button className="btn btn-primary" onClick={restart}>
+                Play again
+              </button>
+              <ShareButton text={`I scored ${score.toLocaleString()} in Shape Crash — play free at Apps On The House!`} />
+            </div>
           </div>
         </div>
       )}
