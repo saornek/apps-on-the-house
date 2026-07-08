@@ -1,4 +1,12 @@
 # Apps On The House — Games
+
+<p align="center">
+  <a href="https://github.com/saornek/apps-on-the-house/actions/workflows/ci.yml"><img src="https://github.com/saornek/apps-on-the-house/actions/workflows/ci.yml/badge.svg" alt="CI" height="20"></a>
+  <a href="https://apps-on-the-house-web.vercel.app/"><img src="https://deploy-badge.vercel.app/vercel/apps-on-the-house-web" alt="Vercel" height="20"></a>
+  <a href="#games"><img src="https://img.shields.io/badge/games-5_live-C2693E.svg" alt="Games" height="20"></a>
+  <a href="https://www.buymeacoffee.com/selinalaraornek"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee" height="20"></a>
+</p>
+
 Open-source games from **Apps On The House**, a small collection of free,
 genuinely usable apps and games.
 

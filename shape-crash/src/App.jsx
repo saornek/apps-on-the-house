@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RotateCcw, HelpCircle, X } from 'lucide-react'
+import { ArrowLeft, RotateCcw, HelpCircle, X } from 'lucide-react'
 import Shape from './shapes.jsx'
+import ShareButton from './ShareButton.jsx'
 import {
   ROWS,
   COLS,
@@ -285,7 +286,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">Shape Crash</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <div className="score-pill">
@@ -410,9 +413,12 @@ export default function App() {
             {newBest && <span className="badge">★ New best score</span>}
             <div className="final-score">{score.toLocaleString()}</div>
             <p>Best: {highScore.toLocaleString()}</p>
-            <button className="btn btn-primary" onClick={restart}>
-              Play again
-            </button>
+            <div className="overlay-actions">
+              <button className="btn btn-primary" onClick={restart}>
+                Play again
+              </button>
+              <ShareButton text={`I scored ${score.toLocaleString()} in Shape Crash — play free at Apps On The House!`} />
+            </div>
           </div>
         </div>
       )}

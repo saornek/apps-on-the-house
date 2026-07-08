@@ -6,7 +6,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ArrowLeft, RotateCcw } from 'lucide-react'
+import ShareButton from './ShareButton.jsx'
 
 const SIZE = 8
 const BEST_KEY = 'just-blocks:best'
@@ -320,7 +321,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">Just Blocks</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <div className="score-box">
@@ -366,9 +369,12 @@ export default function App() {
                 Score <strong>{score}</strong>
                 {score >= best && score > 0 ? ' — new best!' : ` · best ${best}`}
               </p>
-              <button className="btn btn-primary" onClick={restart}>
-                Play again
-              </button>
+              <div className="overlay-actions">
+                <button className="btn btn-primary" onClick={restart}>
+                  Play again
+                </button>
+                <ShareButton text={`I scored ${score} in Just Blocks — play free at Apps On The House!`} />
+              </div>
             </div>
           </div>
         )}

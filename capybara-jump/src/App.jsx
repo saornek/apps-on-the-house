@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { HelpCircle, X } from 'lucide-react'
+import { ArrowLeft, HelpCircle, X } from 'lucide-react'
 import Capybara from './Capybara.jsx'
 import Obstacle from './Obstacle.jsx'
 import Stars from './Stars.jsx'
@@ -210,7 +210,9 @@ export default function App() {
         <header className="game-head">
           <div className="brand">
             <span className="brand-name">Capybara Jump</span>
-            <span className="brand-by">Apps On The House</span>
+            <a className="brand-by" href="/">
+              <ArrowLeft size={11} /> Apps On The House
+            </a>
           </div>
           <div className="score-pill">
             <span className="score-label">Best</span>

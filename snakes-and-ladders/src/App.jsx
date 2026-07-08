@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { RotateCcw, ArrowLeft } from 'lucide-react'
 import { CHARACTERS, CHAR_MAP } from './characters.jsx'
+import ShareButton from './ShareButton.jsx'
 
 const LADDER_COLOR = '#CBA16A'
 const SNAKE_COLOR = '#7FB791'
@@ -281,7 +282,9 @@ export default function App() {
         <header className="game-head">
           <div className="brand">
             <span className="brand-name">Snakes &amp; Ladders</span>
-            <span className="brand-by">Apps On The House</span>
+            <a className="brand-by" href="/">
+              <ArrowLeft size={11} /> Apps On The House
+            </a>
           </div>
         </header>
 
@@ -422,6 +425,15 @@ export default function App() {
               <button className="btn btn-outline" onClick={() => setScreen('setup')}>
                 <ArrowLeft size={15} /> Change setup
               </button>
+              <ShareButton
+                text={
+                  mode === '2p'
+                    ? `${winner === 'you' ? 'Player 1' : 'Player 2'} won our Snakes & Ladders match — play free at Apps On The House!`
+                    : winner === 'you'
+                      ? 'I beat the computer at Snakes & Ladders — play free at Apps On The House!'
+                      : 'The computer beat me at Snakes & Ladders (rematch time) — play free at Apps On The House!'
+                }
+              />
             </div>
           </div>
         </div>

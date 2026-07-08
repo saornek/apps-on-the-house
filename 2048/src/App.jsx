@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ArrowLeft, RotateCcw } from 'lucide-react'
 import { addRandomTile, createInitialBoard, hasWon, isLost, moveBoard } from './board.js'
+import ShareButton from './ShareButton.jsx'
 
 const BEST_KEY = '2048:best'
 const SWIPE_MIN = 28
@@ -143,7 +144,9 @@ export default function App() {
       <header className="game-head">
         <div className="brand">
           <span className="brand-name">2048</span>
-          <span className="brand-by">Apps On The House</span>
+          <a className="brand-by" href="/">
+            <ArrowLeft size={11} /> Apps On The House
+          </a>
         </div>
         <div className="scores">
           <ScoreBox label="Score" value={score} />
@@ -185,6 +188,7 @@ export default function App() {
                     <button className="btn btn-outline" type="button" onClick={startNewGame}>
                       New game
                     </button>
+                    <ShareButton text={`I hit 2048 (score: ${score}) — play free at Apps On The House!`} />
                   </div>
                 </>
               ) : (
@@ -193,9 +197,12 @@ export default function App() {
                   <p>
                     Score <strong>{score}</strong>
                   </p>
-                  <button className="btn btn-primary" type="button" onClick={startNewGame}>
-                    New game
-                  </button>
+                  <div className="overlay-actions">
+                    <button className="btn btn-primary" type="button" onClick={startNewGame}>
+                      New game
+                    </button>
+                    <ShareButton text={`I scored ${score} in 2048 — play free at Apps On The House!`} />
+                  </div>
                 </>
               )}
             </div>
