@@ -276,7 +276,6 @@ function bankCompletedRounds(state) {
 function endRun(state) {
   state.phase = 'gameover'
   state.chain = []
-  if (state.bankedScore > 0) state.score = state.bankedScore
 }
 
 export function tick(state, dtMs, rng = Math.random) {
@@ -357,10 +356,10 @@ export function loseLife(state) {
   state.lives -= 1
   const released = Math.floor(state.chain.length / 2)
   for (let i = 0; i < released; i++) state.chain.pop()
+  refreshScore(state)
   if (state.lives <= 0) {
     endRun(state)
   } else {
-    refreshScore(state)
     state.invincibleMs = INVINCIBLE_MS
   }
 }

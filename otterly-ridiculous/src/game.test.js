@@ -371,7 +371,7 @@ describe('pickups and scoring', () => {
     expect(state.multiplier).toBe(2)
   })
 
-  it('discards unbanked multiplier-round points when the run ends', () => {
+  it('keeps remaining multiplier-round points when the final life is lost', () => {
     const state = startRun()
     state.multiplier = 2
     state.bankedScore = ROUND_ITEM_TARGET
@@ -382,7 +382,7 @@ describe('pickups and scoring', () => {
     loseLife(state)
 
     expect(state.phase).toBe('gameover')
-    expect(state.score).toBe(ROUND_ITEM_TARGET)
+    expect(state.score).toBe(ROUND_ITEM_TARGET + 6)
     expect(state.chain).toHaveLength(0)
   })
 })
