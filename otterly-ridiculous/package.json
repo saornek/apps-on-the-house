@@ -1,0 +1,25 @@
+{
+  "name": "otterly-ridiculous",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Otterly Ridiculous - steer an otter collecting the fish and rocks a panda throws, and dodge the plastic. Part of Apps On The House. Free, no ads, GPLv3.",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "lucide-react": "^1.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
+    "vite": "^8.1.0",
+    "vitest": "^3.0.0"
+  }
+}
