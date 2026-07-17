@@ -142,7 +142,7 @@ export default function App() {
         <div className="overlay">
           <div className="card overlay-card">
             <h2>Solitaire</h2>
-            <p>Classic Klondike. Tap a card, then tap where it should go.</p>
+            <p>Move every card up to the four suit piles, Ace to King, to win. Tap a card, then tap where it should go.</p>
             <div className="setup-buttons">
               <button className="btn btn-primary" onClick={() => startNewGame(1)}>
                 Draw 1
