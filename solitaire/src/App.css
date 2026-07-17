@@ -1,0 +1,394 @@
+/*
+ * Solitaire - layout and game styles.
+ * Copyright (C) 2026 Apps On The House
+ * Licensed under the GNU General Public License v3.0 or later.
+ */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  background: var(--color-bg);
+  color-scheme: light;
+}
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: max(var(--space-3), env(safe-area-inset-top)) var(--space-3) var(--space-3);
+}
+
+.head-title h1 {
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.byline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.byline:hover,
+.byline:focus-visible {
+  color: var(--color-ink);
+}
+
+.head-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.score-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-panel);
+  border-radius: var(--radius-md);
+  padding: 4px 10px;
+  min-width: 44px;
+}
+
+.score-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.2;
+}
+
+.score-val {
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--color-panel);
+}
+
+@media (max-width: 400px) {
+  .game-head {
+    gap: var(--space-2);
+  }
+
+  .byline {
+    white-space: normal;
+  }
+
+  .score-pill {
+    min-width: 0;
+    padding: 4px 7px;
+  }
+
+  .head-right {
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* --- Board layout ---------------------------------------------------- */
+
+:root {
+  --card-w: clamp(32px, 11vw, 78px);
+  --card-h: calc(var(--card-w) * 1.4);
+  --stack-offset: calc(var(--card-w) * 0.34);
+}
+
+.board {
+  flex: 1 1 auto;
+  padding: 0 var(--space-3) var(--space-8);
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.board-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.stock-waste,
+.foundations {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tableau-row {
+  display: grid;
+  grid-template-columns: repeat(7, var(--card-w));
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* --- Piles -------------------------------------------------------------- */
+
+.pile {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+}
+
+.pile-stack {
+  height: calc(var(--card-h) + var(--stack-offset) * 18);
+}
+
+.pile-empty {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pile-empty-glyph {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+}
+
+.card-slot {
+  width: var(--card-w);
+  height: var(--card-h);
+}
+
+/* --- Cards ---------------------------------------------------------------- */
+
+.pcard {
+  position: absolute;
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius: calc(var(--radius-sm) + 2px);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(28, 27, 25, 0.2);
+  user-select: none;
+}
+
+.pile-single .pcard {
+  position: relative;
+}
+
+.pcard-back {
+  background: var(--color-accent);
+  border: 2px solid var(--color-accent-hover);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-accent-hover) 0,
+    var(--color-accent-hover) 2px,
+    transparent 2px,
+    transparent 8px
+  );
+}
+
+.pcard-face {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+}
+
+.pcard-red {
+  color: #B3382C;
+}
+
+.pcard-black {
+  color: var(--color-ink);
+}
+
+.pcard-corner {
+  position: absolute;
+  left: 4px;
+  font-size: calc(var(--card-w) * 0.16);
+  font-weight: var(--weight-semibold);
+  line-height: 1.05;
+  white-space: pre;
+}
+
+.pcard-corner-top {
+  top: 3px;
+}
+
+.pcard-corner-bottom {
+  bottom: 3px;
+  transform: rotate(180deg);
+}
+
+.pcard-pip {
+  font-size: calc(var(--card-w) * 0.34);
+}
+
+.pcard-selected {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 1px;
+  transform: translateY(-4px);
+}
+
+.pcard-shake {
+  animation: pcard-shake 300ms ease;
+}
+
+@keyframes pcard-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcard-shake {
+    animation: none;
+  }
+}
+
+/* --- Overlays ------------------------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 27, 25, 0.35);
+  padding: var(--space-4);
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+.overlay-card {
+  text-align: center;
+  max-width: 340px;
+}
+
+.overlay-card h2 {
+  margin-bottom: var(--space-3);
+}
+
+.overlay-card p {
+  margin-bottom: var(--space-2);
+}
+
+.setup-buttons {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.final-score {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+
+.stats-card {
+  text-align: left;
+}
+
+.stats-row {
+  margin-bottom: var(--space-3);
+}
+
+.stats-row h3 {
+  margin-bottom: var(--space-1);
+}
+
+.auto-complete-btn {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+.share-row {
+  display: flex;
+  justify-content: center;
+  margin: var(--space-3) 0;
+}
+
+.share-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.share-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  padding: 6px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 10;
+}
+
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.share-link:hover {
+  background: var(--color-bg);
+}
