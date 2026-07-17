@@ -130,7 +130,7 @@ export default function App() {
 
   if (phase === 'setup') {
     return (
-      <div className="app">
+      <main className="game" aria-label="Solitaire setup">
         <header className="game-head">
           <div className="head-title">
             <h1>Solitaire</h1>
@@ -153,12 +153,12 @@ export default function App() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     )
   }
 
   return (
-    <div className="app">
+    <main className="game" aria-label="Solitaire game">
       <header className="game-head">
         <div className="head-title">
           <h1>Solitaire</h1>
@@ -292,6 +292,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

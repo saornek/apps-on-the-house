@@ -5,20 +5,26 @@
  */
 
 html,
-body,
-#root {
-  width: 100%;
+body {
+  margin: 0;
   min-height: 100%;
+}
+
+body {
   background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
   color-scheme: light;
 }
 
-.app {
-  min-height: 100vh;
-  min-height: 100dvh;
+.game {
+  width: min(94vw, 720px);
+  padding: clamp(12px, 4vw, 24px) 0 32px;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  gap: 16px;
+  user-select: none;
 }
 
 .game-head {
@@ -26,7 +32,6 @@ body,
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin: max(var(--space-3), env(safe-area-inset-top)) var(--space-3) var(--space-3);
 }
 
 .head-title h1 {
@@ -121,16 +126,13 @@ body,
 /* --- Board layout ---------------------------------------------------- */
 
 :root {
-  --card-w: clamp(32px, 11vw, 78px);
+  --card-w: clamp(32px, 11vw, 92px);
   --card-h: calc(var(--card-w) * 1.4);
   --stack-offset: calc(var(--card-w) * 0.34);
 }
 
 .board {
-  flex: 1 1 auto;
-  padding: 0 var(--space-3) var(--space-8);
-  box-sizing: border-box;
-  overflow-y: auto;
+  padding-bottom: var(--space-4);
 }
 
 .board-top-row {
