@@ -22,7 +22,7 @@ export default function ShareButton({ text }) {
   const [copied, setCopied] = useState(false)
   const menuRef = useRef(null)
 
-  const gamePath = '/games/2048'
+  const gamePath = '/games/2048/'
   const shareUrl =
     typeof window !== 'undefined' && window.location.pathname.startsWith('/games/')
       ? new URL(gamePath, window.location.origin).href
