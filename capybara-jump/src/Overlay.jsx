@@ -29,9 +29,9 @@ export default function Overlay({ phase, score, highScore }) {
             Best: <span>{highScore}</span>
           </p>
           <div className="overlay-actions" onPointerDown={(event) => event.stopPropagation()}>
-            <ShareButton text={`I scored ${score} in Capybara Jump — play free at Apps On The House!`} />
+            <ShareButton text={`I scored ${score} in Capybara Jump. Can you beat me?`} />
           </div>
-          <p className="overlay-hint">Tap anywhere to restart</p>
+          <p className="overlay-hint">Tap anywhere to play again</p>
         </div>
       </div>
     )

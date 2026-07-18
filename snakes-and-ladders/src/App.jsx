@@ -426,13 +426,7 @@ export default function App() {
                 <ArrowLeft size={15} /> Change setup
               </button>
               <ShareButton
-                text={
-                  mode === '2p'
-                    ? `${winner === 'you' ? 'Player 1' : 'Player 2'} won our Snakes & Ladders match — play free at Apps On The House!`
-                    : winner === 'you'
-                      ? 'I beat the computer at Snakes & Ladders — play free at Apps On The House!'
-                      : 'The computer beat me at Snakes & Ladders (rematch time) — play free at Apps On The House!'
-                }
+                text={`I scored ${winner === 'you' ? 100 : pos.you} in Snakes & Ladders. Can you beat me?`}
               />
             </div>
           </div>

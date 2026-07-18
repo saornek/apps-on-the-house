@@ -146,10 +146,10 @@ export default function App() {
               <p className="text-muted">Best {best}</p>
               <div className="share-row" onPointerDown={(e) => e.stopPropagation()}>
                 <ShareButton
-                  text={`I scored ${hud.score} in Otterly Ridiculous — play free at Apps On The House!`}
+                  text={`I scored ${hud.score} in Otterly Ridiculous. Can you beat me?`}
                 />
               </div>
-              <p className="text-muted">Tap anywhere to swim again</p>
+              <p className="text-muted">Tap anywhere to play again</p>
             </div>
           </div>
         )}

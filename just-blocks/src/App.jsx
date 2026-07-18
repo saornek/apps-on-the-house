@@ -373,7 +373,7 @@ export default function App() {
                 <button className="btn btn-primary" onClick={restart}>
                   Play again
                 </button>
-                <ShareButton text={`I scored ${score} in Just Blocks — play free at Apps On The House!`} />
+                <ShareButton text={`I scored ${score} in Just Blocks. Can you beat me?`} />
               </div>
             </div>
           </div>

@@ -22,9 +22,13 @@ export default function ShareButton({ text }) {
   const [copied, setCopied] = useState(false)
   const menuRef = useRef(null)
 
+  const gamePath = '/games/snakes-and-ladders'
   const shareUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/` : 'https://apps-on-the-house.vercel.app/'
-  const fullText = `${text} ${shareUrl}`
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/games/')
+      ? new URL(gamePath, window.location.origin).href
+      : 'https://appsonthehouse.com' + gamePath
+  const shareText = `${text}\n\nFree. No ads. No signup.`
+  const fullText = `${shareText}\n${shareUrl}`
 
   useEffect(() => {
     if (!open) return
@@ -45,7 +49,7 @@ export default function ShareButton({ text }) {
   const handleShare = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ text, url: shareUrl })
+        await navigator.share({ text: shareText, url: shareUrl })
       } catch {
         // User cancelled the native share sheet — nothing to do.
       }
@@ -67,7 +71,7 @@ export default function ShareButton({ text }) {
   const links = [
     {
       label: 'X',
-      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
     },
     {
       label: 'Facebook',
@@ -86,7 +90,7 @@ export default function ShareButton({ text }) {
   return (
     <div className="share-wrap" ref={menuRef}>
       <button className="btn btn-outline share-btn" type="button" onClick={handleShare}>
-        <Share2 size={15} /> Share
+        <Share2 size={15} /> Challenge a Friend
       </button>
       {open && (
         <div className="share-menu" role="menu">

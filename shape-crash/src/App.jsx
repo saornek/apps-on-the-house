@@ -417,7 +417,7 @@ export default function App() {
               <button className="btn btn-primary" onClick={restart}>
                 Play again
               </button>
-              <ShareButton text={`I scored ${score.toLocaleString()} in Shape Crash — play free at Apps On The House!`} />
+              <ShareButton text={`I scored ${score.toLocaleString()} in Shape Crash. Can you beat me?`} />
             </div>
           </div>
         </div>

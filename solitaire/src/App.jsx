@@ -261,7 +261,7 @@ export default function App() {
               {formatTime(elapsedMs)} · {state.moveCount} moves
             </p>
             <div className="share-row">
-              <ShareButton text={`I won Solitaire in ${formatTime(elapsedMs)} (${state.moveCount} moves)!`} />
+              <ShareButton text={`I scored ${formatTime(elapsedMs)} in Solitaire. Can you beat me?`} />
             </div>
             <button className="btn btn-outline" onClick={() => setPhase('setup')}>
               New game

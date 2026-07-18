@@ -188,7 +188,7 @@ export default function App() {
                     <button className="btn btn-outline" type="button" onClick={startNewGame}>
                       New game
                     </button>
-                    <ShareButton text={`I hit 2048 (score: ${score}) — play free at Apps On The House!`} />
+                    <ShareButton text={`I scored ${score} in 2048. Can you beat me?`} />
                   </div>
                 </>
               ) : (
@@ -201,7 +201,7 @@ export default function App() {
                     <button className="btn btn-primary" type="button" onClick={startNewGame}>
                       New game
                     </button>
-                    <ShareButton text={`I scored ${score} in 2048 — play free at Apps On The House!`} />
+                    <ShareButton text={`I scored ${score} in 2048. Can you beat me?`} />
                   </div>
                 </>
               )}
