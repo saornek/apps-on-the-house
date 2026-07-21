@@ -1,6 +1,6 @@
 /*
  * 2048 — a classic sliding tile puzzle.
- * Part of Apps On The House. Free, no ads, no tracking.
+ * Part of Apps On The House. Free, no ads, no ad tracking.
  * Copyright (C) 2026 Apps On The House
  * Licensed under the GNU General Public License v3.0 or later.
  */

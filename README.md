@@ -14,7 +14,7 @@ genuinely usable apps and games.
 
 **Free. No ads. No subscriptions. No dark patterns.**
 
-Every game here is free to play and free to read. No ads, no tracking, no accounts,
+Every game here is free to play and free to read. No ads, no ad tracking, no accounts,
 no in-app purchases. Anything a game saves stays on your device.
 
 ## How these work
@@ -107,7 +107,7 @@ To publish a change to a game:
 ## Contributing
 
 This is a small, for-fun project, but issues and pull requests are welcome. The one
-non-negotiable rule mirrors the promise: **nothing that adds ads, tracking, paywalls,
+non-negotiable rule mirrors the promise: **nothing that adds ads, ad tracking, paywalls,
 or dark patterns**.
 
 ## License
