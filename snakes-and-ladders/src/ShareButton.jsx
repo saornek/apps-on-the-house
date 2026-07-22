@@ -22,7 +22,7 @@ export default function ShareButton({ text }) {
   const [copied, setCopied] = useState(false)
   const menuRef = useRef(null)
 
-  const gamePath = '/games/snakes-and-ladders'
+  const gamePath = '/games/snakes-and-ladders/'
   const shareUrl =
     typeof window !== 'undefined' && window.location.pathname.startsWith('/games/')
       ? new URL(gamePath, window.location.origin).href
@@ -49,7 +49,7 @@ export default function ShareButton({ text }) {
   const handleShare = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ text: shareText, url: shareUrl })
+        await navigator.share({ text: fullText })
       } catch {
         // User cancelled the native share sheet — nothing to do.
       }
