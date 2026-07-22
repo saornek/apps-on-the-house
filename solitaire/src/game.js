@@ -254,6 +254,16 @@ export function autoCompleteStep(state) {
   return null
 }
 
+export function autoCompleteAll(state) {
+  let current = state
+  for (let moved = 0; moved < 52; moved++) {
+    const next = autoCompleteStep(current)
+    if (!next) return current
+    current = next
+  }
+  return current
+}
+
 export function undo(state) {
   if (state.history.length === 0) return state
   const prev = state.history[state.history.length - 1]

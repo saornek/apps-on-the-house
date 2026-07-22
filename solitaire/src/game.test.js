@@ -331,7 +331,7 @@ describe('drawFromStock', () => {
   })
 })
 
-import { checkWin, canAutoComplete, autoCompleteStep } from './game.js'
+import { checkWin, canAutoComplete, autoCompleteStep, autoCompleteAll } from './game.js'
 
 function fullFoundations() {
   const foundations = {}
@@ -389,6 +389,24 @@ describe('autoCompleteStep', () => {
   it('returns null when no legal foundation move exists', () => {
     const state = baseState({ waste: [card('H', 5)] })
     expect(autoCompleteStep(state)).toBeNull()
+  })
+})
+
+describe('autoCompleteAll', () => {
+  it('moves every legal and newly legal card to foundations in one action', () => {
+    const state = baseState({
+      waste: [card('H', 1)],
+      tableau: [[card('S', 1)], [card('H', 2)], [], [], [], [], []],
+    })
+
+    const next = autoCompleteAll(state)
+
+    expect(next.waste).toEqual([])
+    expect(next.tableau[0]).toEqual([])
+    expect(next.tableau[1]).toEqual([])
+    expect(next.foundations.H).toEqual([card('H', 1), card('H', 2)])
+    expect(next.foundations.S).toEqual([card('S', 1)])
+    expect(next.moveCount).toBe(3)
   })
 })
 

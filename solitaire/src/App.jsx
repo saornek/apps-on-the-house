@@ -18,7 +18,7 @@ import {
   undo,
   checkWin,
   canAutoComplete,
-  autoCompleteStep,
+  autoCompleteAll,
 } from './game.js'
 import { loadStats, recordGameStart, recordWin, recordAbandon } from './stats.js'
 
@@ -51,9 +51,8 @@ function reducer(state, action) {
       return { ...drawFromStock(state), selected: null, shake: null }
     case 'UNDO':
       return { ...undo(state), shake: null }
-    case 'AUTO_STEP': {
-      const next = autoCompleteStep(state)
-      if (!next) return state
+    case 'AUTO_COMPLETE': {
+      const next = autoCompleteAll(state)
       return { ...next, won: checkWin(next) }
     }
     case 'CLEAR_SHAKE':
@@ -248,7 +247,7 @@ export default function App() {
       </div>
 
       {canAutoComplete(state) && !state.won && (
-        <button className="btn btn-primary auto-complete-btn" onClick={() => dispatch({ type: 'AUTO_STEP' })}>
+        <button className="btn btn-primary auto-complete-btn" onClick={() => dispatch({ type: 'AUTO_COMPLETE' })}>
           Auto-complete
         </button>
       )}
