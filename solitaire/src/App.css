@@ -129,6 +129,22 @@ body {
   --card-w: clamp(32px, 11vw, 92px);
   --card-h: calc(var(--card-w) * 1.4);
   --stack-offset: calc(var(--card-w) * 0.34);
+  --board-gap: var(--space-2);
+  --card-corner-size: clamp(10px, calc(var(--card-w) * 0.22), 16px);
+  --card-pip-size: clamp(18px, calc(var(--card-w) * 0.42), 38px);
+}
+
+@media (max-width: 520px) {
+  .game {
+    width: min(96vw, 720px);
+    gap: 12px;
+  }
+
+  :root {
+    --card-w: clamp(40px, 12.2vw, 92px);
+    --stack-offset: calc(var(--card-w) * 0.38);
+    --board-gap: clamp(3px, 1vw, var(--space-2));
+  }
 }
 
 .board {
@@ -145,14 +161,14 @@ body {
 .stock-waste,
 .foundations {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--board-gap);
 }
 
 .tableau-row {
   display: grid;
   grid-template-columns: repeat(7, var(--card-w));
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--board-gap);
 }
 
 /* --- Piles -------------------------------------------------------------- */
@@ -234,7 +250,7 @@ body {
 .pcard-corner {
   position: absolute;
   left: 4px;
-  font-size: calc(var(--card-w) * 0.16);
+  font-size: var(--card-corner-size);
   font-weight: var(--weight-semibold);
   line-height: 1.05;
   white-space: pre;
@@ -250,7 +266,7 @@ body {
 }
 
 .pcard-pip {
-  font-size: calc(var(--card-w) * 0.34);
+  font-size: var(--card-pip-size);
 }
 
 .pcard-selected {

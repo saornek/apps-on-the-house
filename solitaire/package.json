@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.3",
+    "postcss": "^8.5.16",
     "vite": "^8.1.0",
     "vitest": "^3.0.0"
   }
