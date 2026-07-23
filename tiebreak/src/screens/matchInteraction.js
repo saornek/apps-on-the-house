@@ -7,7 +7,7 @@ export const HELP_INSTRUCTIONS = [
 ]
 
 export function handleMatchEscape(event, paused, { focusPause, pause, resume }) {
-  if (event.key !== 'Escape') return
+  if (event.key !== 'Escape' || event.repeat) return
   event.preventDefault()
   event.stopPropagation()
   if (paused) {

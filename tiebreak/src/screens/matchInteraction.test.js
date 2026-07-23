@@ -12,9 +12,10 @@ const MATCH_SCREEN_SOURCE = readFileSync(
   'utf8',
 )
 
-function escapeEvent() {
+function escapeEvent(repeat = false) {
   return {
     key: 'Escape',
+    repeat,
     preventDefault: vi.fn(),
     stopPropagation: vi.fn(),
   }
@@ -41,6 +42,19 @@ describe('match pause interaction', () => {
 
     expect(actions.resume).toHaveBeenCalledOnce()
     expect(actions.pause).not.toHaveBeenCalled()
+  })
+
+  it('ignores repeated Escape keydown events', () => {
+    const event = escapeEvent(true)
+    const actions = { focusPause: vi.fn(), pause: vi.fn(), resume: vi.fn() }
+
+    handleMatchEscape(event, false, actions)
+
+    expect(event.preventDefault).not.toHaveBeenCalled()
+    expect(event.stopPropagation).not.toHaveBeenCalled()
+    expect(actions.focusPause).not.toHaveBeenCalled()
+    expect(actions.pause).not.toHaveBeenCalled()
+    expect(actions.resume).not.toHaveBeenCalled()
   })
 
   it('does not advance the simulation while paused', () => {

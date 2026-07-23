@@ -1,6 +1,8 @@
 /* Tiebreak service worker — immutable, build-revisioned offline shell generations. */
 const CACHE_PREFIX = 'tiebreak-shell-'
 const CORE_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg']
+const SHELL_GENERATION = null
+const PRECACHE_MANIFEST = null
 let activeCacheName = null
 
 function scopedUrl(path) {
@@ -23,6 +25,23 @@ function revisionFor(value) {
 }
 
 async function cacheShell() {
+  if (SHELL_GENERATION && PRECACHE_MANIFEST) {
+    const responses = await Promise.all(PRECACHE_MANIFEST.map(async (entry) => [
+      scopedUrl(entry.url),
+      await fetchForInstall(scopedUrl(entry.url)),
+    ]))
+    const cacheName = `${CACHE_PREFIX}${SHELL_GENERATION}`
+    try {
+      const cache = await caches.open(cacheName)
+      await Promise.all(responses.map(([url, response]) => cache.put(url, response.clone())))
+      activeCacheName = cacheName
+      return
+    } catch (error) {
+      await caches.delete(cacheName)
+      throw error
+    }
+  }
+
   const appRoot = scopedUrl('./')
   const indexUrl = scopedUrl('./index.html')
   const indexResponse = await fetchForInstall(indexUrl)
