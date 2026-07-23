@@ -1,21 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import GameCanvas from '../GameCanvas.jsx'
 import ModalBoundary from './ModalBoundary.jsx'
-import { pointResultMessage } from './matchFeedback.js'
+import { countdownFeedback, pointResultMessage } from './matchFeedback.js'
+import {
+  HELP_INSTRUCTIONS,
+  ONBOARDING_HINT,
+  handleMatchEscape,
+} from './matchInteraction.js'
 
 function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
   return (
     <ModalBoundary
       labelledBy="pause-title"
       className="pause-dialog"
-      onClose={() => {}}
+      onClose={onResume}
     >
       <p className="eyebrow">Time out</p>
       <h2 id="pause-title">{showingHelp ? 'How to play' : 'Match paused'}</h2>
       {showingHelp ? (
         <>
-          <p>Move into the ball. Your monster chooses forehand or backhand and swings for you.</p>
-          <p>Player 1 uses W A S D. Player 2 uses the arrow keys. Touch players drag on their half.</p>
+          {HELP_INSTRUCTIONS.map((instruction) => (
+            <p key={instruction}>{instruction}</p>
+          ))}
         </>
       ) : (
         <p>The court is frozen until you return.</p>
@@ -47,13 +53,17 @@ export default function MatchScreen({
   onHome,
 }) {
   const initialMatch = simulationRef.current.match
+  const pauseButtonRef = useRef(null)
   const [paused, setPaused] = useState(false)
   const [showingHelp, setShowingHelp] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(true)
   const [snapshot, setSnapshot] = useState({
     phase: initialMatch.phase,
     scores: [...initialMatch.scores],
     currentServer: initialMatch.currentServer,
     lastPoint: initialMatch.lastPoint,
+    countdownMs: simulationRef.current.countdownMs,
+    cue: simulationRef.current.cue,
   })
 
   useEffect(() => {
@@ -64,6 +74,30 @@ export default function MatchScreen({
     return () => document.removeEventListener('visibilitychange', pauseForVisibility)
   }, [])
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowOnboarding(false), 4500)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const resume = () => {
+      setShowingHelp(false)
+      setPaused(false)
+    }
+    const handleKeyDown = (event) => {
+      handleMatchEscape(event, paused, {
+        focusPause: () => pauseButtonRef.current?.focus(),
+        pause: () => {
+          setShowingHelp(false)
+          setPaused(true)
+        },
+        resume,
+      })
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [paused])
+
   const handleSnapshot = (simulation) => {
     const match = simulation.match
     audio.play(simulation.cue, muted)
@@ -72,6 +106,8 @@ export default function MatchScreen({
       scores: [...match.scores],
       currentServer: match.currentServer,
       lastPoint: match.lastPoint ? { ...match.lastPoint } : null,
+      countdownMs: simulation.countdownMs,
+      cue: simulation.cue,
     })
     if (match.phase === 'match-over') {
       onFinish({
@@ -84,9 +120,12 @@ export default function MatchScreen({
 
   const players = initialMatch.players
   const pointMessage = pointResultMessage(snapshot, players)
+  const countdownMessage = countdownFeedback(snapshot)
+  const transientMessage = pointMessage || countdownMessage
   const liveMessage = [
     `${players[0].name} ${snapshot.scores[0]}, ${players[1].name} ${snapshot.scores[1]}.`,
     pointMessage,
+    countdownMessage,
     `${players[snapshot.currentServer].name} serves.`,
   ].filter(Boolean).join(' ')
   const faceToFace = players[1].kind === 'human'
@@ -110,6 +149,7 @@ export default function MatchScreen({
           <span>{players[1].name}</span>
         </div>
         <button
+          ref={pauseButtonRef}
           className="icon-button pause-button"
           type="button"
           aria-label="Pause match"
@@ -127,19 +167,17 @@ export default function MatchScreen({
           reducedMotion={reducedMotion}
           onSnapshot={handleSnapshot}
         />
+        {showOnboarding && (
+          <p className="onboarding-hint">{ONBOARDING_HINT}</p>
+        )}
       </div>
 
       <p className="point-result">
-        {pointMessage}
+        {transientMessage}
       </p>
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
         {liveMessage}
       </p>
-      <div className="match-controls" aria-label="Match controls">
-        <p><strong>Keyboard</strong> P1: W A S D · P2: arrow keys</p>
-        <p><strong>Touch</strong> Drag on your half of the court</p>
-      </div>
-
       {paused && (
         <PauseDialog
           showingHelp={showingHelp}

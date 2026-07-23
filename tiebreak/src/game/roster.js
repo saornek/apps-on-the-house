@@ -89,9 +89,23 @@ export function spritePlan(monsterId, pose) {
 
   const racketHeadX = offset.racketSide * 7 + offset.racketX
   const racketHandleX = racketHeadX + offset.racketSide
+  const armStartX = offset.bodyX + offset.racketSide * 4
+  const armStartY = offset.bodyY - 2
+  const armEndX = racketHandleX + 1
+  const armEndY = offset.racketY + 2
+  const armX = Math.min(armStartX, armEndX)
+  const armY = Math.min(armStartY, armEndY)
 
   return [
     ...silhouette(monster, offset),
+    rect(
+      'racket-arm',
+      armX,
+      armY,
+      Math.abs(armEndX - armStartX) + 1,
+      Math.abs(armEndY - armStartY) + 1,
+      monster.shade,
+    ),
     {
       part: 'racket-head',
       kind: 'outline',

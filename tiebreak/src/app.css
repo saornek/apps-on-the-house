@@ -433,7 +433,7 @@ button:disabled {
 
 .match-screen {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   max-width: 48rem;
   min-height: 100dvh;
   overflow: hidden;
@@ -491,12 +491,28 @@ button:disabled {
 }
 
 .court-frame {
+  position: relative;
   display: grid;
   min-height: 0;
   overflow: hidden;
   border: 4px solid var(--cream);
   container-type: size;
   place-items: center;
+}
+
+.onboarding-hint {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  background: rgba(16, 47, 56, 0.88);
+  color: var(--cream);
+  font-size: clamp(0.68rem, 2vw, 0.82rem);
+  font-weight: 900;
+  text-align: center;
+  pointer-events: none;
 }
 
 .game-canvas {
@@ -516,26 +532,6 @@ button:disabled {
   color: var(--sun);
   font-weight: 900;
   text-align: center;
-}
-
-.match-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  padding-top: 0.3rem;
-  color: color-mix(in srgb, var(--cream) 82%, transparent);
-  font-size: clamp(0.66rem, 2vw, 0.78rem);
-  text-align: center;
-}
-
-.match-controls p {
-  margin-bottom: 0;
-}
-
-.match-controls strong {
-  color: var(--sun);
-  font-family: var(--font-pixel);
-  text-transform: uppercase;
 }
 
 .visually-hidden {
@@ -641,10 +637,6 @@ button:disabled {
     grid-row: 1 / 3;
   }
 
-  .match-controls {
-    display: grid;
-    gap: 0.15rem;
-  }
 }
 
 @media (hover: none) and (pointer: coarse) {

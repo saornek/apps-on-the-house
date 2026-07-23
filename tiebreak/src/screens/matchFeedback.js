@@ -9,3 +9,10 @@ export function pointResultMessage(snapshot, players) {
   const winner = players[snapshot.lastPoint.winner]
   return `${winner.name} wins the point · ${POINT_REASON[snapshot.lastPoint.reason]}`
 }
+
+export function countdownFeedback(snapshot) {
+  if (snapshot.phase === 'countdown') {
+    return String(Math.max(1, Math.ceil(snapshot.countdownMs / 1000)))
+  }
+  return snapshot.phase === 'rally' && snapshot.cue === 'serve' ? 'Serve' : ''
+}
