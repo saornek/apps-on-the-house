@@ -1,8 +1,8 @@
 # Tiebreak — Game Design
 
-**Date:** 2026-07-23  
-**Status:** Approved for implementation planning  
-**Repository:** `games`  
+**Date:** 2026-07-23
+**Status:** Approved for implementation planning
+**Repository:** `games`
 **License:** GPL-3.0-or-later
 
 ## Summary
