@@ -1,6 +1,7 @@
-/* Tiebreak service worker — cache-first runtime caching with background revalidation. */
-const CACHE = 'tiebreak-v1'
+/* Tiebreak service worker — immutable, build-revisioned offline shell generations. */
+const CACHE_PREFIX = 'tiebreak-shell-'
 const CORE_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg']
+let activeCacheName = null
 
 function scopedUrl(path) {
   return new URL(path, self.location.href).href
@@ -12,8 +13,16 @@ async function fetchForInstall(url) {
   return response
 }
 
+function revisionFor(value) {
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0).toString(36)
+}
+
 async function cacheShell() {
-  const cache = await caches.open(CACHE)
   const appRoot = scopedUrl('./')
   const indexUrl = scopedUrl('./index.html')
   const indexResponse = await fetchForInstall(indexUrl)
@@ -29,7 +38,22 @@ async function cacheShell() {
 
   const shellUrls = new Set(CORE_SHELL.map(scopedUrl))
   for (const assetUrl of builtAssets) shellUrls.add(assetUrl)
-  await cache.addAll([...shellUrls])
+  const urls = [...shellUrls]
+  const responses = await Promise.all(urls.map(async (url) => [
+    url,
+    url === indexUrl ? indexResponse.clone() : await fetchForInstall(url),
+  ]))
+  const revision = revisionFor(`${indexHtml}\n${builtAssets.sort().join('\n')}`)
+  const cacheName = `${CACHE_PREFIX}${revision}`
+
+  try {
+    const cache = await caches.open(cacheName)
+    await Promise.all(responses.map(([url, response]) => cache.put(url, response.clone())))
+    activeCacheName = cacheName
+  } catch (error) {
+    await caches.delete(cacheName)
+    throw error
+  }
 }
 
 self.addEventListener('install', (event) => {
@@ -45,8 +69,13 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys()
+      const generations = keys.filter((key) => key.startsWith(CACHE_PREFIX))
+      activeCacheName ??= generations[generations.length - 1] ?? null
       const oldTiebreakCaches = keys.filter(
-        (key) => key.startsWith('tiebreak-') && key !== CACHE,
+        (key) => (
+          (key.startsWith(CACHE_PREFIX) || key === 'tiebreak-v1') &&
+          key !== activeCacheName
+        ),
       )
       await Promise.all(oldTiebreakCaches.map((key) => caches.delete(key)))
       await self.clients.claim()
@@ -61,22 +90,17 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     (async () => {
-      const cache = await caches.open(CACHE)
+      const generationNames = (await caches.keys()).filter(
+        (key) => key.startsWith(CACHE_PREFIX),
+      )
+      const cacheName = activeCacheName ?? generationNames[generationNames.length - 1]
+      if (!cacheName) return fetch(request)
+      const cache = await caches.open(cacheName)
       const cached = await cache.match(request)
-      if (cached) {
-        const revalidation = fetch(request)
-          .then((response) => {
-            if (response?.ok) return cache.put(request, response.clone())
-            return undefined
-          })
-          .catch(() => {})
-        event.waitUntil(revalidation)
-        return cached
-      }
+      if (cached) return cached
 
       try {
         const response = await fetch(request)
-        if (response?.ok) cache.put(request, response.clone())
         return response
       } catch (error) {
         if (request.mode === 'navigate') {
