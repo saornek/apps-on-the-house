@@ -12,3 +12,16 @@ describe('focus styling', () => {
     expect(focusRule).not.toContain('var(--sun)')
   })
 })
+
+describe('match canvas sizing', () => {
+  it('fits the full 2:3 court against both dimensions of its grid row', () => {
+    const frameRule = STYLES.match(/\.court-frame\s*\{([^}]*)\}/)?.[1] ?? ''
+    const canvasRule = STYLES.match(/\.game-canvas\s*\{([^}]*)\}/)?.[1] ?? ''
+
+    expect(frameRule).toMatch(/container-type:\s*size/)
+    expect(canvasRule).toMatch(/width:\s*min\(100cqw,\s*66\.666667cqh\)/)
+    expect(canvasRule).toMatch(/height:\s*auto/)
+    expect(canvasRule).not.toMatch(/height:\s*100%/)
+    expect(canvasRule).toMatch(/aspect-ratio:\s*2\s*\/\s*3/)
+  })
+})
