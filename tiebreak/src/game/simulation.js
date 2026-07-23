@@ -28,6 +28,7 @@ import {
   SWING_RECOVERY_PER_STAT_MS,
   WORLD_W,
 } from './config.js'
+import { createAiState, updateAi } from './ai.js'
 import { awardPoint } from './match.js'
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
@@ -37,6 +38,8 @@ const normalize = (vector) => {
   return magnitude > 1 ? { x: vector.x / magnitude, y: vector.y / magnitude } : vector
 }
 const halfForY = (y) => (y < NET_Y ? 1 : 0)
+const SERVICE_MARGIN = 12
+const SERVICE_NET_MARGIN = 52
 
 export const movementSpeed = (build) =>
   PLAYER_BASE_SPEED + build.footwork * PLAYER_SPEED_PER_STAT
@@ -64,6 +67,9 @@ export function createSimulation(match) {
     pointResultMs: 0,
     accumulatorMs: 0,
     serveAim: { x: 0, y: -1 },
+    ai: match.players.map((player) => (
+      player.kind === 'ai' ? createAiState(player.difficulty) : null
+    )),
     players: [
       {
         x: WORLD_W / 2, y: COURT_BOTTOM - 52, input: { x: 0, y: 0 },
@@ -77,6 +83,7 @@ export function createSimulation(match) {
     ball: {
       live: false, x: WORLD_W / 2, y: COURT_BOTTOM - 72, z: 28,
       vx: 0, vy: 0, vz: 0, lastHitter: null, bounceHalf: null, bouncesInHalf: 0,
+      groundContacts: 0, firstBounceHalf: null,
     },
   }
 }
@@ -100,29 +107,75 @@ export function setServeAim(state, vector) {
   })
 }
 
+export function serviceBoxFor(match) {
+  const serverIndex = match.currentServer
+  const deucePoint = match.totalPoints % 2 === 0
+  const targetLeft = serverIndex === 0 ? deucePoint : !deucePoint
+  const centerX = (COURT_LEFT + COURT_RIGHT) / 2
+  const receiverIsTop = serverIndex === 0
+  const serviceLine = receiverIsTop
+    ? COURT_TOP + (NET_Y - COURT_TOP) / 2
+    : NET_Y + (COURT_BOTTOM - NET_Y) / 2
+  return {
+    left: targetLeft ? COURT_LEFT : centerX,
+    right: targetLeft ? centerX : COURT_RIGHT,
+    top: receiverIsTop ? serviceLine : NET_Y,
+    bottom: receiverIsTop ? NET_Y : serviceLine,
+  }
+}
+
+function serveTarget(state, serverIndex, rng) {
+  const server = state.players[serverIndex]
+  const direction = serverIndex === 0 ? -1 : 1
+  const box = serviceBoxFor(state.match)
+  const ratingRange = (server.build.serve - 1) / 8
+  const centerX = (box.left + box.right) / 2
+  const halfWidth = (box.right - box.left) / 2 - SERVICE_MARGIN
+  const usableWidth = halfWidth * (0.58 + ratingRange * 0.36)
+  const errorX = placementError(server.build.serve, rng) * halfWidth * 0.45
+  const x = clamp(
+    centerX + state.serveAim.x * usableWidth + errorX,
+    box.left + SERVICE_MARGIN,
+    box.right - SERVICE_MARGIN,
+  )
+  const nearNet = direction < 0
+    ? box.bottom - SERVICE_NET_MARGIN
+    : box.top + SERVICE_NET_MARGIN
+  const deep = direction < 0
+    ? box.top + SERVICE_MARGIN
+    : box.bottom - SERVICE_MARGIN
+  const forward = clamp(state.serveAim.y * direction, -1, 1)
+  const depth = (forward + 1) / 2
+  const y = nearNet + (deep - nearNet) * depth
+  return { x, y }
+}
+
 export function startServe(state, rng = Math.random) {
   const serverIndex = state.match.currentServer
   const server = state.players[serverIndex]
   const direction = serverIndex === 0 ? -1 : 1
   const speed = serveSpeed(server.build.serve)
-  const aimX = clamp(
-    state.serveAim.x + placementError(server.build.serve, rng),
-    -1,
-    1,
-  )
+  const x = server.x
+  const y = server.y + direction * 20
+  const z = 42
+  const target = serveTarget(state, serverIndex, rng)
+  const distance = Math.hypot(target.x - x, target.y - y)
+  const flightTime = distance / speed
   state.phase = 'rally'
   state.match.phase = 'rally'
   state.ball = {
     live: true,
-    x: server.x,
-    y: server.y + direction * 20,
-    z: 42,
-    vx: aimX * speed * 0.42,
-    vy: direction * speed,
-    vz: 225,
+    x,
+    y,
+    z,
+    vx: (target.x - x) / flightTime,
+    vy: (target.y - y) / flightTime,
+    vz: (GRAVITY * flightTime * flightTime / 2 - z) / flightTime,
     lastHitter: serverIndex,
     bounceHalf: null,
     bouncesInHalf: 0,
+    groundContacts: 0,
+    firstBounceHalf: null,
   }
   server.pose = 'serve'
   server.recoveryMs = 300
@@ -138,7 +191,14 @@ function finishPoint(state, winner, reason) {
     player.input = { x: 0, y: 0 }
     player.pose = 'idle'
   }
-  emitCue(state, state.match.phase === 'match-over' ? 'win' : reason === 'net' ? 'net' : 'point')
+  emitCue(
+    state,
+    state.match.phase === 'match-over'
+      ? 'win'
+      : reason === 'net' || reason === 'out'
+        ? reason
+        : 'point',
+  )
 }
 
 function movePlayers(state, dt) {
@@ -160,15 +220,21 @@ function returnBall(state, playerIndex, rng) {
   const stroke = strokeFor(playerIndex, player.x, state.ball.x)
   const rating = player.build[stroke]
   const direction = playerIndex === 0 ? -1 : 1
-  const aim = length(player.input) > 0.05 ? player.input : { x: 0, y: direction }
+  const aiAim = state.ai?.[playerIndex]?.shotAim
+  const aim = aiAim ?? (
+    length(player.input) > 0.05 ? player.input : { x: 0, y: direction }
+  )
   const speed = shotSpeed(rating)
   const aimX = clamp(aim.x + placementError(rating, rng), -1, 1)
+  const forward = clamp(aim.y * direction, -1, 1)
   state.ball.vx = aimX * speed * 0.72
-  state.ball.vy = direction * speed * (0.78 + Math.abs(aim.y) * 0.22)
+  state.ball.vy = direction * speed * (0.78 + forward * 0.22)
   state.ball.vz = 220
   state.ball.lastHitter = playerIndex
   state.ball.bounceHalf = null
   state.ball.bouncesInHalf = 0
+  state.ball.groundContacts = 0
+  state.ball.firstBounceHalf = null
   player.pose = stroke
   player.recoveryMs = swingRecovery(player.build)
   emitCue(state, 'hit')
@@ -192,7 +258,9 @@ function tryAutomaticReturns(state, rng) {
 
 function stepBall(state, dt, rng) {
   if (!state.ball.live) return
+  const previousX = state.ball.x
   const previousY = state.ball.y
+  const previousZ = state.ball.z
   state.ball.x += state.ball.vx * dt
   state.ball.y += state.ball.vy * dt
   state.ball.z += state.ball.vz * dt
@@ -205,7 +273,16 @@ function stepBall(state, dt, rng) {
   }
 
   if (state.ball.z <= 0 && state.ball.vz < 0) {
+    const contactFraction = clamp(previousZ / (previousZ - state.ball.z), 0, 1)
+    state.ball.x = previousX + (state.ball.x - previousX) * contactFraction
+    state.ball.y = previousY + (state.ball.y - previousY) * contactFraction
     state.ball.z = 0
+    const groundContacts = state.ball.groundContacts ??
+      (state.ball.bouncesInHalf > 0 ? 1 : 0)
+    if (groundContacts >= 1) {
+      finishPoint(state, state.ball.lastHitter, 'double-bounce')
+      return
+    }
     const inside =
       state.ball.x >= COURT_LEFT && state.ball.x <= COURT_RIGHT &&
       state.ball.y >= COURT_TOP && state.ball.y <= COURT_BOTTOM
@@ -214,13 +291,10 @@ function stepBall(state, dt, rng) {
       return
     }
     const bounceHalf = halfForY(state.ball.y)
-    state.ball.bouncesInHalf =
-      state.ball.bounceHalf === bounceHalf ? state.ball.bouncesInHalf + 1 : 1
+    state.ball.groundContacts = 1
+    state.ball.firstBounceHalf = bounceHalf
+    state.ball.bouncesInHalf = 1
     state.ball.bounceHalf = bounceHalf
-    if (state.ball.bouncesInHalf >= 2) {
-      finishPoint(state, 1 - bounceHalf, 'double-bounce')
-      return
-    }
     state.ball.vz = Math.abs(state.ball.vz) * BOUNCE_FACTOR
     emitCue(state, 'bounce')
   }
@@ -245,6 +319,11 @@ function fixedStep(state, dt, rng) {
     return
   }
   if (state.phase !== 'rally') return
+  state.ai?.forEach((ai, playerIndex) => {
+    if (!ai) return
+    const movement = updateAi(ai, state, playerIndex, dt * 1000, rng)
+    setMovement(state, playerIndex, movement)
+  })
   movePlayers(state, dt)
   stepBall(state, dt, rng)
 }
@@ -253,7 +332,7 @@ export function advanceSimulation(state, elapsedMs, rng = Math.random) {
   state.accumulatorMs += Math.min(Math.max(0, elapsedMs), MAX_FRAME_MS)
   while (state.accumulatorMs + 0.000001 >= FIXED_STEP_MS) {
     fixedStep(state, FIXED_STEP_MS / 1000, rng)
-    state.accumulatorMs -= FIXED_STEP_MS
+    state.accumulatorMs = Number((state.accumulatorMs - FIXED_STEP_MS).toFixed(9))
   }
   return state
 }

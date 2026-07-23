@@ -1,7 +1,27 @@
+import { MAX_FRAME_MS } from './config.js'
+
 export const AI_LEVELS = {
-  easy: { reactionMs: 360, targetError: 76, recoveryBias: 0.35 },
-  normal: { reactionMs: 210, targetError: 38, recoveryBias: 0.55 },
-  hard: { reactionMs: 105, targetError: 14, recoveryBias: 0.72 },
+  easy: {
+    reactionMs: 360,
+    targetError: 76,
+    recoveryBias: 0.35,
+    shotWidth: 0.28,
+    shotDepth: 0.25,
+  },
+  normal: {
+    reactionMs: 210,
+    targetError: 38,
+    recoveryBias: 0.55,
+    shotWidth: 0.56,
+    shotDepth: 0.5,
+  },
+  hard: {
+    reactionMs: 105,
+    targetError: 14,
+    recoveryBias: 0.72,
+    shotWidth: 0.86,
+    shotDepth: 0.72,
+  },
 }
 
 const normalize = ({ x, y }) => {
@@ -17,21 +37,18 @@ export function createAiState(difficulty) {
     reactionMs: profile.reactionMs,
     cooldownMs: profile.reactionMs,
     movement: { x: 0, y: 0 },
+    shotAim: { x: 0, y: 0 },
   }
 }
 
-export function updateAi(ai, simulation, playerIndex, elapsedMs, rng = Math.random) {
+function chooseDecision(ai, simulation, playerIndex, rng) {
   const profile = AI_LEVELS[ai.difficulty]
-  ai.cooldownMs -= elapsedMs
-  if (ai.cooldownMs > 0 || simulation.phase !== 'rally') return ai.movement
-  ai.cooldownMs = ai.reactionMs
-
   const player = simulation.players[playerIndex]
   const ballApproaches = playerIndex === 1
     ? simulation.ball.vy < 0
     : simulation.ball.vy > 0
-  const error = (rng() * 2 - 1) * profile.targetError
-  const targetX = ballApproaches ? simulation.ball.x + error : 240
+  const interceptionError = (rng() * 2 - 1) * profile.targetError
+  const targetX = ballApproaches ? simulation.ball.x + interceptionError : 240
   const homeY = playerIndex === 1 ? 120 : 600
   const targetY = ballApproaches
     ? simulation.ball.y + (playerIndex === 1 ? -34 : 34)
@@ -40,5 +57,21 @@ export function updateAi(ai, simulation, playerIndex, elapsedMs, rng = Math.rand
     x: (targetX - player.x) / 80,
     y: (targetY - player.y) / 80,
   })
+
+  const shotSide = rng() < 0.5 ? -1 : 1
+  const direction = playerIndex === 0 ? -1 : 1
+  ai.shotAim = {
+    x: shotSide * profile.shotWidth,
+    y: direction * profile.shotDepth,
+  }
+}
+
+export function updateAi(ai, simulation, playerIndex, elapsedMs, rng = Math.random) {
+  if (simulation.phase !== 'rally') return ai.movement
+  ai.cooldownMs -= Math.min(Math.max(0, elapsedMs), MAX_FRAME_MS)
+  while (ai.cooldownMs <= 0) {
+    chooseDecision(ai, simulation, playerIndex, rng)
+    ai.cooldownMs += ai.reactionMs
+  }
   return ai.movement
 }

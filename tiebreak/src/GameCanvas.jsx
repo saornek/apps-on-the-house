@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { createAiState, updateAi } from './game/ai.js'
 import { WORLD_H, WORLD_W } from './game/config.js'
 import {
   beginTouch,
@@ -15,6 +14,7 @@ import {
   setServeAim,
 } from './game/simulation.js'
 import { drawFrame } from './render.js'
+import { advanceLiveFrame } from './screens/matchInteraction.js'
 
 const ZERO_MOVEMENT = { x: 0, y: 0 }
 const CONTROL_KEYS = new Set([
@@ -52,6 +52,7 @@ function snapshotKey(state) {
     currentServer,
     lastPoint?.reason ?? '',
     state.cueId,
+    state.phase === 'countdown' ? Math.ceil(state.countdownMs / 1000) : '',
   ].join('|')
 }
 
@@ -63,7 +64,6 @@ export default function GameCanvas({
   onSnapshot,
 }) {
   const canvasRef = useRef(null)
-  const aiRef = useRef(null)
   const snapshotRef = useRef(null)
   const snapshotCallbackRef = useRef(onSnapshot)
   const reducedMotionRef = useRef(reducedMotion)
@@ -150,7 +150,7 @@ export default function GameCanvas({
       const elapsedMs = Math.max(0, now - lastTime)
       lastTime = now
 
-      if (!paused) {
+      advanceLiveFrame(paused, () => {
         const playerOneInput = movementForPlayer(inputRef.current, 0)
         const playerTwoInput = movementForPlayer(inputRef.current, 1)
         const opponent = state.match.players[1]
@@ -160,19 +160,10 @@ export default function GameCanvas({
           : playerOneInput
         let playerTwoMovement = playerTwoInput
 
-        if (singlePlayer) {
-          if (!aiRef.current || aiRef.current.difficulty !== opponent.difficulty) {
-            aiRef.current = createAiState(opponent.difficulty)
-          }
-          playerTwoMovement = updateAi(aiRef.current, state, 1, elapsedMs)
-        } else {
-          aiRef.current = null
-        }
-
         if (state.phase === 'countdown') {
           const serveMovement = state.match.currentServer === 0
             ? playerOneMovement
-            : playerTwoMovement
+            : singlePlayer ? ZERO_MOVEMENT : playerTwoMovement
           setServeAim(state, serveMovement)
           playerOneMovement = ZERO_MOVEMENT
           playerTwoMovement = ZERO_MOVEMENT
@@ -181,7 +172,7 @@ export default function GameCanvas({
         setMovement(state, 0, playerOneMovement)
         setMovement(state, 1, playerTwoMovement)
         advanceSimulation(state, elapsedMs)
-      }
+      })
 
       drawFrame(ctx, state, now, reducedMotionRef.current)
 
