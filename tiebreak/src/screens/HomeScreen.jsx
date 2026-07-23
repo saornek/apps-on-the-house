@@ -1,35 +1,29 @@
 import { useState } from 'react'
 import { MONSTERS } from '../game/roster.js'
+import ModalBoundary from './ModalBoundary.jsx'
 import MonsterFigure from './MonsterFigure.jsx'
 
 function HowToPlayDialog({ onClose }) {
   return (
-    <div className="modal-backdrop">
-      <section
-        className="game-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="how-to-play-title"
-      >
-        <p className="eyebrow">Courtside notes</p>
-        <h2 id="how-to-play-title">How to play</h2>
-        <p>Move into the ball and your monster swings automatically.</p>
-        <dl className="control-list">
-          <div>
-            <dt>Player 1</dt>
-            <dd>W A S D, or drag on the lower court</dd>
-          </div>
-          <div>
-            <dt>Player 2</dt>
-            <dd>Arrow keys, or drag on the upper court</dd>
-          </div>
-        </dl>
-        <p>First to 7 wins. At 6–6, win by 2.</p>
-        <button className="button button--primary" type="button" onClick={onClose}>
-          Got it
-        </button>
-      </section>
-    </div>
+    <ModalBoundary labelledBy="how-to-play-title" onClose={onClose}>
+      <p className="eyebrow">Courtside notes</p>
+      <h2 id="how-to-play-title">How to play</h2>
+      <p>Move into the ball and your monster swings automatically.</p>
+      <dl className="control-list">
+        <div>
+          <dt>Player 1</dt>
+          <dd>W A S D, or drag on the lower court</dd>
+        </div>
+        <div>
+          <dt>Player 2</dt>
+          <dd>Arrow keys, or drag on the upper court</dd>
+        </div>
+      </dl>
+      <p>First to 7 wins. At 6–6, win by 2.</p>
+      <button className="button button--primary" type="button" onClick={onClose}>
+        Got it
+      </button>
+    </ModalBoundary>
   )
 }
 

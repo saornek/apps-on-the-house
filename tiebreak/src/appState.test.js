@@ -73,4 +73,26 @@ describe('last monster preference', () => {
       },
     })).toBe('crumblehorn')
   })
+
+  it('survives a blocked global localStorage getter', () => {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new Error('storage access blocked')
+      },
+    })
+
+    try {
+      expect(() => loadLastMonster()).not.toThrow()
+      expect(loadLastMonster()).toBe('crumblehorn')
+      expect(() => saveLastMonster('mossbyte')).not.toThrow()
+    } finally {
+      if (originalDescriptor) {
+        Object.defineProperty(globalThis, 'localStorage', originalDescriptor)
+      } else {
+        delete globalThis.localStorage
+      }
+    }
+  })
 })

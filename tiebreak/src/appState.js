@@ -8,19 +8,21 @@ const AI_BUILDS = [
 ]
 const LAST_MONSTER_KEY = 'tiebreak:last-monster'
 
-export function loadLastMonster(storage = globalThis.localStorage) {
+export function loadLastMonster(storage) {
   try {
-    const id = storage?.getItem(LAST_MONSTER_KEY)
+    const resolvedStorage = storage === undefined ? globalThis.localStorage : storage
+    const id = resolvedStorage?.getItem(LAST_MONSTER_KEY)
     return MONSTERS.some((monster) => monster.id === id) ? id : MONSTERS[0].id
   } catch {
     return MONSTERS[0].id
   }
 }
 
-export function saveLastMonster(monsterId, storage = globalThis.localStorage) {
+export function saveLastMonster(monsterId, storage) {
   if (!MONSTERS.some((monster) => monster.id === monsterId)) return
   try {
-    storage?.setItem(LAST_MONSTER_KEY, monsterId)
+    const resolvedStorage = storage === undefined ? globalThis.localStorage : storage
+    resolvedStorage?.setItem(LAST_MONSTER_KEY, monsterId)
   } catch {
     return
   }

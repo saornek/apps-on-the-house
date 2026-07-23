@@ -1,46 +1,39 @@
 import { useEffect, useState } from 'react'
 import GameCanvas from '../GameCanvas.jsx'
-
-const POINT_REASON = {
-  out: 'ball out',
-  net: 'into the net',
-  'double-bounce': 'double bounce',
-}
+import ModalBoundary from './ModalBoundary.jsx'
+import { pointResultMessage } from './matchFeedback.js'
 
 function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
   return (
-    <div className="modal-backdrop">
-      <section
-        className="game-dialog pause-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pause-title"
-      >
-        <p className="eyebrow">Time out</p>
-        <h2 id="pause-title">{showingHelp ? 'How to play' : 'Match paused'}</h2>
-        {showingHelp ? (
-          <>
-            <p>Move into the ball. Your monster chooses forehand or backhand and swings for you.</p>
-            <p>Player 1 uses W A S D. Player 2 uses the arrow keys. Touch players drag on their half.</p>
-          </>
-        ) : (
-          <p>The court is frozen until you return.</p>
+    <ModalBoundary
+      labelledBy="pause-title"
+      className="pause-dialog"
+      onClose={onResume}
+    >
+      <p className="eyebrow">Time out</p>
+      <h2 id="pause-title">{showingHelp ? 'How to play' : 'Match paused'}</h2>
+      {showingHelp ? (
+        <>
+          <p>Move into the ball. Your monster chooses forehand or backhand and swings for you.</p>
+          <p>Player 1 uses W A S D. Player 2 uses the arrow keys. Touch players drag on their half.</p>
+        </>
+      ) : (
+        <p>The court is frozen until you return.</p>
+      )}
+      <div className="dialog-actions">
+        {!showingHelp && (
+          <button className="button button--quiet" type="button" onClick={onShowHelp}>
+            How to play
+          </button>
         )}
-        <div className="dialog-actions">
-          {!showingHelp && (
-            <button className="button button--quiet" type="button" onClick={onShowHelp}>
-              How to play
-            </button>
-          )}
-          <button className="button button--primary" type="button" onClick={onResume}>
-            Resume
-          </button>
-          <button className="button button--quiet" type="button" onClick={onHome}>
-            Home
-          </button>
-        </div>
-      </section>
-    </div>
+        <button className="button button--primary" type="button" onClick={onResume}>
+          Resume
+        </button>
+        <button className="button button--quiet" type="button" onClick={onHome}>
+          Home
+        </button>
+      </div>
+    </ModalBoundary>
   )
 }
 
@@ -87,11 +80,7 @@ export default function MatchScreen({
   }
 
   const players = initialMatch.players
-  const pointMessage = snapshot.lastPoint
-    ? `${players[snapshot.lastPoint.winner].name} wins the point · ${
-      POINT_REASON[snapshot.lastPoint.reason]
-    }`
-    : ''
+  const pointMessage = pointResultMessage(snapshot, players)
 
   return (
     <main className="screen match-screen">
