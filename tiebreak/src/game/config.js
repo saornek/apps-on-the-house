@@ -1,0 +1,10 @@
+export const WORLD_W = 480
+export const WORLD_H = 720
+export const NET_Y = WORLD_H / 2
+export const STAT_MIN = 1
+export const STAT_MAX = 9
+export const STAT_BUDGET = 20
+export const FIXED_STEP_MS = 1000 / 60
+export const MAX_FRAME_MS = 100
+export const COUNTDOWN_MS = 1800
+export const POINT_RESULT_MS = 1100
