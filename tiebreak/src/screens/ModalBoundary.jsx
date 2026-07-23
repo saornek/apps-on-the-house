@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
+  ensureFocusInside,
   focusInitialElement,
   handleModalKeyDown,
   isolateAppBackground,
@@ -32,6 +33,10 @@ export default function ModalBoundary({ labelledBy, className = '', onClose, chi
       restoreFocus(previousFocus)
     }
   }, [])
+
+  useLayoutEffect(() => {
+    ensureFocusInside(dialogRef.current, document.activeElement)
+  }, [children])
 
   return createPortal(
     <div className="modal-backdrop">

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  ensureFocusInside,
   focusInitialElement,
   handleModalKeyDown,
   isolateAppBackground,
@@ -42,6 +43,22 @@ describe('modal focus boundary', () => {
 
     expect(first.focus).toHaveBeenCalledOnce()
     expect(prior.focus).toHaveBeenCalledOnce()
+  })
+
+  it('recovers focus after dialog content replacement without stealing contained focus', () => {
+    const first = focusable()
+    const retained = focusable()
+    const dialog = {
+      ...dialogWith([first, retained]),
+      contains: (element) => element === first || element === retained,
+    }
+
+    ensureFocusInside(dialog, { focus: vi.fn() })
+    expect(first.focus).toHaveBeenCalledOnce()
+
+    ensureFocusInside(dialog, retained)
+    expect(first.focus).toHaveBeenCalledOnce()
+    expect(retained.focus).not.toHaveBeenCalled()
   })
 
   it('wraps forward and reverse Tab within the dialog', () => {

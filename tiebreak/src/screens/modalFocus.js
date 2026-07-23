@@ -21,6 +21,10 @@ export function focusInitialElement(dialog) {
   ;(first ?? dialog).focus()
 }
 
+export function ensureFocusInside(dialog, activeElement) {
+  if (!dialog.contains(activeElement)) focusInitialElement(dialog)
+}
+
 export function restoreFocus(element) {
   if (element?.isConnected !== false) element?.focus?.()
 }
