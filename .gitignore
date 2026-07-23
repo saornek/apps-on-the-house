@@ -31,3 +31,4 @@ Thumbs.db
 # Docs
 /docs
 .claude
+.worktrees/
