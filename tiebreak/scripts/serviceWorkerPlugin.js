@@ -50,11 +50,14 @@ export function serviceWorkerPlugin() {
     closeBundle() {
       const workerPath = join(outDir, 'sw.js')
       const manifest = shellManifest(outDir)
-      const generation = digest(JSON.stringify(manifest))
       const source = readFileSync(workerPath, 'utf8')
       if (!source.includes(GENERATION_MARKER) || !source.includes(PRECACHE_MARKER)) {
         throw new Error('Tiebreak service-worker build markers are missing.')
       }
+      const generation = digest(JSON.stringify({
+        manifest,
+        workerTemplateRevision: digest(source),
+      }))
       writeFileSync(
         workerPath,
         source

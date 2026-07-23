@@ -44,8 +44,12 @@ function createCacheStorage(initial = {}) {
       new Map(Object.entries(entries).map(([url, body]) => [url, response(body)])),
     ]),
   )
+  const failingPuts = new Set()
   return {
     stores,
+    failPut(url) {
+      failingPuts.add(url)
+    },
     api: {
       keys: async () => [...stores.keys()],
       open: async (name) => {
@@ -54,7 +58,11 @@ function createCacheStorage(initial = {}) {
         const resolve = (request) => new URL(request.url ?? request, WORKER_URL).href
         return {
           match: async (request) => store.get(resolve(request)),
-          put: async (request, value) => store.set(resolve(request), value),
+          put: async (request, value) => {
+            const url = resolve(request)
+            if (failingPuts.has(url)) throw new Error(`Unable to put ${url}`)
+            store.set(url, value)
+          },
           addAll: async (requests) => {
             const staged = await Promise.all(requests.map(async (request) => {
               const value = await globalFetch(request)
@@ -153,7 +161,7 @@ function workerHarness({
   }
 }
 
-function writeBuildFixture({ appText, iconText }) {
+function writeBuildFixture({ appText, iconText, workerSource = SERVICE_WORKER_SOURCE }) {
   const root = mkdtempSync(join(TEST_PROJECT_ROOT, '.tmp-sw-build-'))
   BUILD_FIXTURES.push(root)
   mkdirSync(join(root, 'public'))
@@ -164,11 +172,11 @@ function writeBuildFixture({ appText, iconText }) {
   writeFileSync(join(root, 'app.js'), `document.querySelector('#app').textContent = ${JSON.stringify(appText)}`)
   writeFileSync(join(root, 'public', 'icon.svg'), `<svg><title>${iconText}</title></svg>`)
   writeFileSync(join(root, 'public', 'manifest.webmanifest'), JSON.stringify({ name: 'Tiebreak' }))
-  writeFileSync(join(root, 'public', 'sw.js'), SERVICE_WORKER_SOURCE)
+  writeFileSync(join(root, 'public', 'sw.js'), workerSource)
   return root
 }
 
-function updateBuildFixture(root, { appText, iconText }) {
+function updateBuildFixture(root, { appText, iconText, workerSource }) {
   if (appText !== undefined) {
     writeFileSync(
       join(root, 'app.js'),
@@ -177,6 +185,9 @@ function updateBuildFixture(root, { appText, iconText }) {
   }
   if (iconText !== undefined) {
     writeFileSync(join(root, 'public', 'icon.svg'), `<svg><title>${iconText}</title></svg>`)
+  }
+  if (workerSource !== undefined) {
+    writeFileSync(join(root, 'public', 'sw.js'), workerSource)
   }
 }
 
@@ -220,11 +231,58 @@ function cacheGeneration(cacheStorage) {
   return [...cacheStorage.stores.keys()].find((name) => name.startsWith('tiebreak-shell-'))
 }
 
+function sourceGeneration(source) {
+  return source.match(/const SHELL_GENERATION = "([^"]+)"/)?.[1]
+}
+
 afterEach(() => {
   while (BUILD_FIXTURES.length) rmSync(BUILD_FIXTURES.pop(), { recursive: true, force: true })
 })
 
 describe('Tiebreak service-worker generations', () => {
+  it('changes cache generation when only worker logic changes between builds', async () => {
+    const root = writeBuildFixture({ appText: 'same app', iconText: 'same core' })
+    const firstBuild = await buildFixture(root)
+    updateBuildFixture(root, {
+      workerSource: `${SERVICE_WORKER_SOURCE}\n// worker-only build two`,
+    })
+    const secondBuild = await buildFixture(root)
+
+    expect(secondBuild.source).not.toBe(firstBuild.source)
+    expect(sourceGeneration(secondBuild.source)).not.toBe(sourceGeneration(firstBuild.source))
+  })
+
+  it('preserves the complete previous generation when worker-only install cache writes fail', async () => {
+    const root = writeBuildFixture({ appText: 'same app', iconText: 'same core' })
+    const firstBuild = await buildFixture(root)
+    updateBuildFixture(root, {
+      workerSource: `${SERVICE_WORKER_SOURCE}\n// worker-only failing build`,
+    })
+    const secondBuild = await buildFixture(root)
+    const cacheStorage = createCacheStorage()
+    const firstWorker = workerHarness({
+      cacheStorage,
+      resources: firstBuild.resources,
+      source: firstBuild.source,
+    })
+    await firstWorker.dispatchLifecycle('install')
+    await firstWorker.dispatchLifecycle('activate')
+    const firstGeneration = cacheGeneration(cacheStorage)
+    const firstCache = cacheStorage.stores.get(firstGeneration)
+
+    cacheStorage.failPut(`${APP_ROOT}index.html`)
+    const secondWorker = workerHarness({
+      cacheStorage,
+      resources: secondBuild.resources,
+      source: secondBuild.source,
+    })
+
+    await expect(secondWorker.dispatchLifecycle('install')).rejects.toThrow(/index\.html/)
+    expect([...cacheStorage.stores.keys()]).toEqual([firstGeneration])
+    expect(cacheStorage.stores.get(firstGeneration)).toBe(firstCache)
+    expect(firstCache.get(APP_ROOT).body).toBe(firstBuild.resources[APP_ROOT])
+  })
+
   it('changes worker bytes and cache generation when only a core shell file changes', async () => {
     const root = writeBuildFixture({ appText: 'same app', iconText: 'core one' })
     const firstBuild = await buildFixture(root)
