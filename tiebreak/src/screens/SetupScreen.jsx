@@ -21,12 +21,13 @@ export default function SetupScreen({
 }) {
   const validation = validateBuild(draftBuild)
   const heading = mode === 'single' ? 'Build your monster' : `Player ${setupIndex + 1}`
+  const topTouchSetup = mode === 'local' && setupIndex === 1
 
   return (
-    <main className="screen setup-screen">
+    <main className={topTouchSetup ? 'screen setup-screen setup-screen--top-touch' : 'screen setup-screen'}>
       <header className="screen-heading">
         <p className="eyebrow">Pick your racket beast</p>
-        <h1>{heading}</h1>
+        <h1 data-screen-heading tabIndex="-1">{heading}</h1>
         <p>Spend exactly 20 stat points.</p>
       </header>
 

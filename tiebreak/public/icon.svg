@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Horned pixel monster holding a tennis racket on a clay court</title>
+  <rect width="512" height="512" fill="#102f38"/>
+  <rect x="48" y="48" width="416" height="416" fill="#a74e36"/>
+  <rect x="64" y="64" width="384" height="384" fill="#cf6f45"/>
+  <rect x="72" y="252" width="368" height="8" fill="#fff3cf"/>
+  <rect x="252" y="72" width="8" height="368" fill="#fff3cf"/>
+  <path d="M151 184h36v-32h36v32h70v-32h36v32h32v164H151z" fill="#77d6bf"/>
+  <path d="M163 176l28-72 44 80zm134 8 32-80 40 80z" fill="#173a42"/>
+  <rect x="171" y="216" width="40" height="40" fill="#fff3cf"/>
+  <rect x="301" y="216" width="40" height="40" fill="#fff3cf"/>
+  <rect x="183" y="228" width="20" height="20" fill="#173a42"/>
+  <rect x="313" y="228" width="20" height="20" fill="#173a42"/>
+  <path d="M211 292h90v16h-90z" fill="#173a42"/>
+  <rect x="171" y="348" width="56" height="32" fill="#173a42"/>
+  <rect x="285" y="348" width="56" height="32" fill="#173a42"/>
+  <circle cx="385" cy="302" r="62" fill="none" stroke="#173a42" stroke-width="18"/>
+  <path d="M342 260l86 86M428 260l-86 86" fill="none" stroke="#173a42" stroke-width="7"/>
+  <path d="M342 346l-54 70" fill="none" stroke="#173a42" stroke-width="18"/>
+  <circle cx="414" cy="150" r="24" fill="#ffd054" stroke="#173a42" stroke-width="8"/>
+</svg>

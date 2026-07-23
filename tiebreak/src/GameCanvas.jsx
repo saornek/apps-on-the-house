@@ -45,7 +45,14 @@ function combinedMovement(first, second) {
 
 function snapshotKey(state) {
   const { currentServer, lastPoint, scores } = state.match
-  return [state.phase, scores[0], scores[1], currentServer, lastPoint?.reason ?? ''].join('|')
+  return [
+    state.phase,
+    scores[0],
+    scores[1],
+    currentServer,
+    lastPoint?.reason ?? '',
+    state.cueId,
+  ].join('|')
 }
 
 export default function GameCanvas({
@@ -197,15 +204,8 @@ export default function GameCanvas({
       width={WORLD_W}
       height={WORLD_H}
       aria-label="Tiebreak tennis court"
+      className="game-canvas"
       role="img"
-      style={{
-        display: 'block',
-        width: '100%',
-        height: 'auto',
-        aspectRatio: `${WORLD_W} / ${WORLD_H}`,
-        imageRendering: 'pixelated',
-        touchAction: 'none',
-      }}
     />
   )
 }

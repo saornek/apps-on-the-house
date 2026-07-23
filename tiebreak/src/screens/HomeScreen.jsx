@@ -42,7 +42,7 @@ export default function HomeScreen({
       <main className="screen home-screen">
         <header className="brand-lockup brand-lockup--small">
           <p className="eyebrow">Choose your rival</p>
-          <h1>Tiebreak</h1>
+          <h1 data-screen-heading tabIndex="-1">Tiebreak</h1>
         </header>
         <section className="menu-panel" aria-labelledby="difficulty-title">
           <h2 id="difficulty-title">Laptop difficulty</h2>
@@ -82,7 +82,7 @@ export default function HomeScreen({
 
       <header className="brand-lockup">
         <p className="eyebrow">Monster court club</p>
-        <h1>Tiebreak</h1>
+        <h1 data-screen-heading tabIndex="-1">Tiebreak</h1>
         <p>First to 7 · Win by 2</p>
       </header>
 

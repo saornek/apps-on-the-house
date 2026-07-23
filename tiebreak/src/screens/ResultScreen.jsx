@@ -15,7 +15,7 @@ export default function ResultScreen({ match, onRematch, onHome }) {
     <main className="screen result-screen">
       <header className="result-heading">
         <p className="eyebrow">Match point</p>
-        <h1>{winner.name} wins!</h1>
+        <h1 data-screen-heading tabIndex="-1">{winner.name} wins!</h1>
         <p className="final-score" aria-label={`Final score ${match.scores[0]} to ${match.scores[1]}`}>
           <strong>{match.scores[0]}</strong>
           <span>–</span>

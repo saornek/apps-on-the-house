@@ -8,7 +8,7 @@ function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
     <ModalBoundary
       labelledBy="pause-title"
       className="pause-dialog"
-      onClose={onResume}
+      onClose={() => {}}
     >
       <p className="eyebrow">Time out</p>
       <h2 id="pause-title">{showingHelp ? 'How to play' : 'Match paused'}</h2>
@@ -40,6 +40,8 @@ function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
 export default function MatchScreen({
   simulationRef,
   inputRef,
+  audio,
+  muted,
   reducedMotion,
   onFinish,
   onHome,
@@ -64,6 +66,7 @@ export default function MatchScreen({
 
   const handleSnapshot = (simulation) => {
     const match = simulation.match
+    audio.play(simulation.cue, muted)
     setSnapshot({
       phase: match.phase,
       scores: [...match.scores],
@@ -81,15 +84,24 @@ export default function MatchScreen({
 
   const players = initialMatch.players
   const pointMessage = pointResultMessage(snapshot, players)
+  const liveMessage = [
+    `${players[0].name} ${snapshot.scores[0]}, ${players[1].name} ${snapshot.scores[1]}.`,
+    pointMessage,
+    `${players[snapshot.currentServer].name} serves.`,
+  ].filter(Boolean).join(' ')
+  const faceToFace = players[1].kind === 'human'
 
   return (
-    <main className="screen match-screen">
+    <main className={faceToFace ? 'screen match-screen match-screen--face-to-face' : 'screen match-screen'}>
+      <h1 className="visually-hidden" data-screen-heading tabIndex="-1">
+        Tiebreak match
+      </h1>
       <section className="match-hud" aria-label="Match score">
         <div className={snapshot.currentServer === 0 ? 'score-player is-serving' : 'score-player'}>
           <span>{players[0].name}</span>
           <strong>{snapshot.scores[0]}</strong>
         </div>
-        <div className="server-status" aria-live="polite">
+        <div className="server-status">
           <span className="server-dot" aria-hidden="true" />
           <span>{players[snapshot.currentServer].name} serves</span>
         </div>
@@ -117,9 +129,16 @@ export default function MatchScreen({
         />
       </div>
 
-      <p className="point-result" aria-live="assertive" aria-atomic="true">
+      <p className="point-result">
         {pointMessage}
       </p>
+      <p className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </p>
+      <div className="match-controls" aria-label="Match controls">
+        <p><strong>Keyboard</strong> P1: W A S D · P2: arrow keys</p>
+        <p><strong>Touch</strong> Drag on your half of the court</p>
+      </div>
 
       {paused && (
         <PauseDialog

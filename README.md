@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/saornek/apps-on-the-house/actions/workflows/ci.yml"><img src="https://github.com/saornek/apps-on-the-house/actions/workflows/ci.yml/badge.svg" alt="CI" height="20"></a>
   <a href="https://apps-on-the-house-web.vercel.app/"><img src="https://deploy-badge.vercel.app/vercel/apps-on-the-house-web" alt="Vercel" height="20"></a>
-  <a href="#games"><img src="https://img.shields.io/badge/games-5_live-C2693E.svg" alt="Games" height="20"></a>
+  <a href="#games"><img src="https://img.shields.io/badge/games-8_live-C2693E.svg" alt="Games" height="20"></a>
   <a href="https://www.buymeacoffee.com/selinalaraornek"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee" height="20"></a>
 </p>
 
@@ -40,6 +40,25 @@ npm run dev      # play locally with hot reload
 npm run build    # production build into dist/
 ```
 
+### Tiebreak
+
+Fast pixel tennis for one player against the laptop or two players sharing the
+same device. Choose a racket-bearing monster, allocate exactly 20 points across
+forehand, backhand, serve, and footwork, then play a first-to-seven tiebreak —
+with a two-point lead required to win.
+
+Player 1 uses W A S D, Player 2 uses the arrow keys, and touch players drag on
+their own half of the court. Tiebreak works offline and remembers only your mute
+preference and last monster choice on your device.
+
+```bash
+cd tiebreak
+npm install
+npm run dev
+npm test
+npm run build
+```
+
 *More games to come.*
 
 ## Repo layout
@@ -48,6 +67,7 @@ Each game lives in its own folder:
 
 ```
 just-blocks/        A block puzzle
+tiebreak/           Pixel tennis for one or two players
 README.md           This file
 LICENSE             GNU GPLv3
 ```

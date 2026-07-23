@@ -5,6 +5,7 @@ import {
   loadLastMonster,
   saveLastMonster,
 } from './appState.js'
+import { createAudio, loadMute, saveMute } from './audio.js'
 import { createInputState } from './game/input.js'
 import { createMatch, STAT_KEYS } from './game/match.js'
 import { MONSTERS } from './game/roster.js'
@@ -14,7 +15,6 @@ import MatchScreen from './screens/MatchScreen.jsx'
 import MonsterFigure from './screens/MonsterFigure.jsx'
 import ResultScreen from './screens/ResultScreen.jsx'
 import SetupScreen from './screens/SetupScreen.jsx'
-import './app.css'
 
 const STAT_LABELS = {
   forehand: 'Forehand',
@@ -52,7 +52,7 @@ function IntroScreen({ players, onStart }) {
   return (
     <main className="screen intro-screen" aria-labelledby="intro-title">
       <p className="eyebrow">Next on court</p>
-      <h1 id="intro-title">Ready?</h1>
+      <h1 id="intro-title" data-screen-heading tabIndex="-1">Ready?</h1>
       <section className="versus-card">
         {players.map((player, index) => {
           const monster = monsterFor(player.monsterId)
@@ -82,7 +82,15 @@ function IntroScreen({ players, onStart }) {
   )
 }
 
-function MatchSession({ players, openingServer, reducedMotion, onFinish, onHome }) {
+function MatchSession({
+  players,
+  openingServer,
+  audio,
+  muted,
+  reducedMotion,
+  onFinish,
+  onHome,
+}) {
   const matchRef = useRef(null)
   const simulationRef = useRef(null)
   const inputRef = useRef(null)
@@ -97,6 +105,8 @@ function MatchSession({ players, openingServer, reducedMotion, onFinish, onHome 
     <MatchScreen
       simulationRef={simulationRef}
       inputRef={inputRef}
+      audio={audio}
+      muted={muted}
       reducedMotion={reducedMotion}
       onFinish={onFinish}
       onHome={onHome}
@@ -107,7 +117,9 @@ function MatchSession({ players, openingServer, reducedMotion, onFinish, onHome 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, initialAppState)
   const [selectedMonster, setSelectedMonster] = useState(loadLastMonster)
-  const [muted, setMuted] = useState(false)
+  const [muted, setMuted] = useState(loadMute)
+  const audioRef = useRef(null)
+  audioRef.current ??= createAudio()
   const reducedMotion = useReducedMotion()
   const startMatch = useCallback(() => dispatch({ type: 'start-match' }), [])
   const returnHome = useCallback(() => dispatch({ type: 'home' }), [])
@@ -115,17 +127,31 @@ export default function App() {
     dispatch({ type: 'finish-match', match })
   }, [])
 
+  useEffect(() => {
+    document.querySelector('[data-screen-heading]')?.focus()
+  }, [state.phase, state.setupIndex])
+
   if (state.phase === 'home' || state.phase === 'difficulty') {
     return (
       <HomeScreen
         phase={state.phase}
         muted={muted}
-        onChooseMode={(mode) => dispatch({ type: 'choose-mode', mode })}
+        onChooseMode={(mode) => {
+          audioRef.current.unlock(muted)
+          dispatch({ type: 'choose-mode', mode })
+        }}
         onChooseDifficulty={(difficulty) => {
           dispatch({ type: 'choose-difficulty', difficulty })
         }}
         onBack={returnHome}
-        onToggleMute={() => setMuted((value) => !value)}
+        onToggleMute={() => {
+          setMuted((value) => {
+            const next = !value
+            saveMute(next)
+            if (!next) audioRef.current.unlock(false)
+            return next
+          })
+        }}
       />
     )
   }
@@ -164,6 +190,8 @@ export default function App() {
         reducedMotion={reducedMotion}
         onFinish={finishMatch}
         onHome={returnHome}
+        audio={audioRef.current}
+        muted={muted}
       />
     )
   }

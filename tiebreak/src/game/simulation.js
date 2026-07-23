@@ -58,6 +58,8 @@ export function createSimulation(match) {
   return {
     match,
     phase: 'countdown',
+    cue: null,
+    cueId: 0,
     countdownMs: COUNTDOWN_MS,
     pointResultMs: 0,
     accumulatorMs: 0,
@@ -77,6 +79,11 @@ export function createSimulation(match) {
       vx: 0, vy: 0, vz: 0, lastHitter: null, bounceHalf: null, bouncesInHalf: 0,
     },
   }
+}
+
+function emitCue(state, name) {
+  state.cue = name
+  state.cueId += 1
 }
 
 export function setMovement(state, playerIndex, vector) {
@@ -119,6 +126,7 @@ export function startServe(state, rng = Math.random) {
   }
   server.pose = 'serve'
   server.recoveryMs = 300
+  emitCue(state, 'serve')
 }
 
 function finishPoint(state, winner, reason) {
@@ -130,6 +138,7 @@ function finishPoint(state, winner, reason) {
     player.input = { x: 0, y: 0 }
     player.pose = 'idle'
   }
+  emitCue(state, state.match.phase === 'match-over' ? 'win' : reason === 'net' ? 'net' : 'point')
 }
 
 function movePlayers(state, dt) {
@@ -162,6 +171,7 @@ function returnBall(state, playerIndex, rng) {
   state.ball.bouncesInHalf = 0
   player.pose = stroke
   player.recoveryMs = swingRecovery(player.build)
+  emitCue(state, 'hit')
 }
 
 function tryAutomaticReturns(state, rng) {
@@ -212,6 +222,7 @@ function stepBall(state, dt, rng) {
       return
     }
     state.ball.vz = Math.abs(state.ball.vz) * BOUNCE_FACTOR
+    emitCue(state, 'bounce')
   }
 
   tryAutomaticReturns(state, rng)
@@ -226,7 +237,9 @@ function fixedStep(state, dt, rng) {
   if (state.phase === 'point-result') {
     state.pointResultMs -= dt * 1000
     if (state.pointResultMs <= 0) {
+      const cueId = state.cueId
       const next = createSimulation({ ...state.match, phase: 'countdown' })
+      next.cueId = cueId
       Object.assign(state, next)
     }
     return
