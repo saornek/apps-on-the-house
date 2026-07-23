@@ -1,0 +1,76 @@
+import { describe, expect, it } from 'vitest'
+import {
+  appReducer,
+  initialAppState,
+  loadLastMonster,
+  saveLastMonster,
+} from './appState.js'
+
+describe('single-player flow', () => {
+  it('collects mode, difficulty, and one human setup', () => {
+    let state = initialAppState()
+    state = appReducer(state, { type: 'choose-mode', mode: 'single' })
+    expect(state.phase).toBe('difficulty')
+    state = appReducer(state, { type: 'choose-difficulty', difficulty: 'normal' })
+    expect(state.phase).toBe('setup')
+    state = appReducer(state, {
+      type: 'confirm-player',
+      monsterId: 'crumblehorn',
+      build: state.draftBuild,
+    })
+    expect(state.phase).toBe('intro')
+    expect(state.players).toHaveLength(2)
+    expect(state.players[1].kind).toBe('ai')
+  })
+})
+
+describe('two-player flow', () => {
+  it('collects two equal-budget players in sequence', () => {
+    let state = appReducer(initialAppState(), { type: 'choose-mode', mode: 'local' })
+    state = appReducer(state, {
+      type: 'confirm-player',
+      monsterId: 'mossbyte',
+      build: state.draftBuild,
+    })
+    expect(state.phase).toBe('setup')
+    expect(state.setupIndex).toBe(1)
+    state = appReducer(state, {
+      type: 'confirm-player',
+      monsterId: 'blinkblob',
+      build: state.draftBuild,
+    })
+    expect(state.phase).toBe('intro')
+    expect(state.players.map((player) => player.monsterId)).toEqual(['mossbyte', 'blinkblob'])
+  })
+})
+
+describe('stat editing', () => {
+  it('will not confirm an invalid allocation', () => {
+    let state = appReducer(initialAppState(), { type: 'choose-mode', mode: 'local' })
+    state = appReducer(state, { type: 'change-stat', stat: 'serve', delta: 1 })
+    expect(() =>
+      appReducer(state, {
+        type: 'confirm-player',
+        monsterId: 'crumblehorn',
+        build: state.draftBuild,
+      }),
+    ).toThrow(/twenty-point/i)
+  })
+})
+
+describe('last monster preference', () => {
+  it('persists a valid cosmetic choice and survives blocked storage', () => {
+    const values = new Map()
+    const storage = {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, value),
+    }
+    saveLastMonster('mossbyte', storage)
+    expect(loadLastMonster(storage)).toBe('mossbyte')
+    expect(loadLastMonster({
+      getItem: () => {
+        throw new Error('blocked')
+      },
+    })).toBe('crumblehorn')
+  })
+})
