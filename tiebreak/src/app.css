@@ -39,8 +39,9 @@ button {
 }
 
 button:focus-visible {
-  outline: 4px solid var(--sun);
-  outline-offset: 3px;
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--ink) !important;
 }
 
 [data-screen-heading]:focus {

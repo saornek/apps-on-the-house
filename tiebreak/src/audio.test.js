@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loadMute, saveMute } from './audio.js'
+import { createAudio, loadMute, saveMute } from './audio.js'
 
 describe('mute preference', () => {
   it('loads and saves a boolean preference', () => {
@@ -20,5 +20,69 @@ describe('mute preference', () => {
     }
     expect(loadMute(blocked)).toBe(false)
     expect(() => saveMute(true, blocked)).not.toThrow()
+  })
+})
+
+describe('audio cues', () => {
+  it('stays lazy and plays every named profile with a synchronous resume implementation', () => {
+    const originalAudioContext = globalThis.AudioContext
+    const frequencies = []
+    let contexts = 0
+
+    class FakeAudioContext {
+      constructor() {
+        contexts += 1
+        this.currentTime = 10
+        this.destination = {}
+      }
+
+      resume() {}
+
+      createOscillator() {
+        return {
+          frequency: {
+            set value(frequency) {
+              frequencies.push(frequency)
+            },
+          },
+          connect() {
+            return this
+          },
+          start() {},
+          stop() {},
+        }
+      }
+
+      createGain() {
+        return {
+          gain: {
+            setValueAtTime() {},
+            exponentialRampToValueAtTime() {},
+          },
+          connect() {
+            return this
+          },
+        }
+      }
+    }
+
+    globalThis.AudioContext = FakeAudioContext
+    try {
+      const audio = createAudio()
+      expect(contexts).toBe(0)
+      audio.play('unknown')
+      audio.play('serve', true)
+      expect(contexts).toBe(0)
+
+      for (const cue of ['serve', 'hit', 'bounce', 'net', 'point', 'win']) {
+        expect(() => audio.play(cue)).not.toThrow()
+      }
+
+      expect(contexts).toBe(1)
+      expect(frequencies).toEqual([260, 420, 180, 95, 520, 660])
+    } finally {
+      if (originalAudioContext) globalThis.AudioContext = originalAudioContext
+      else delete globalThis.AudioContext
+    }
   })
 })

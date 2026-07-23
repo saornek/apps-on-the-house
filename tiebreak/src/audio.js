@@ -36,17 +36,25 @@ export function createAudio() {
     context ??= new AudioContext()
     return context
   }
+  const resumeContext = () => {
+    try {
+      context?.resume?.()?.catch?.(() => {})
+    } catch {
+      return
+    }
+  }
 
   return {
     unlock(muted = false) {
       if (muted) return
-      getContext()?.resume?.().catch(() => {})
+      context = getContext()
+      resumeContext()
     },
     play(name, muted = false) {
       if (muted || !CUES[name]) return
       context = getContext()
       if (!context) return
-      context.resume?.().catch(() => {})
+      resumeContext()
       const [frequency, duration] = CUES[name]
       const oscillator = context.createOscillator()
       const gain = context.createGain()
