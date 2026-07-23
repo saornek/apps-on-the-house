@@ -33,12 +33,19 @@ function drawPrimitive(ctx, primitive, x, y, scale, mirror) {
   }
 }
 
+export function localRacketSide(screenDirection, playerIndex) {
+  const normalizedScreenDirection = screenDirection < 0 ? -1 : 1
+  const playerMirror = playerIndex === 0 ? 1 : -1
+  return normalizedScreenDirection * playerMirror
+}
+
 function drawMonster(ctx, player, playerIndex, now) {
   const running = player.pose === 'run'
   const pose = running ? (Math.floor(now / 130) % 2 ? 'run-a' : 'run-b') : player.pose
   const mirror = playerIndex === 0 ? 1 : -1
   const scale = 3
-  for (const primitive of spritePlan(player.monsterId, pose)) {
+  const racketSide = localRacketSide(player.racketDirection ?? 1, playerIndex)
+  for (const primitive of spritePlan(player.monsterId, pose, racketSide)) {
     drawPrimitive(ctx, primitive, player.x, player.y, scale, mirror)
   }
 }

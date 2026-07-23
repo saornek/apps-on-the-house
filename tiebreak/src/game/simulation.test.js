@@ -84,6 +84,77 @@ function launch(state, ball) {
 }
 
 describe('players', () => {
+  it('remembers horizontal racket direction and ignores centered or vertical input', () => {
+    const state = makeState()
+
+    expect(state.players.map((player) => player.racketDirection)).toEqual([1, 1])
+
+    setMovement(state, 0, { x: -1, y: 0 })
+    expect(state.players[0].racketDirection).toBe(-1)
+
+    setMovement(state, 0, { x: 0, y: -1 })
+    setMovement(state, 0, { x: 0.05, y: 0 })
+    expect(state.players[0].racketDirection).toBe(-1)
+
+    setMovement(state, 0, { x: 1, y: 0 })
+    expect(state.players[0].racketDirection).toBe(1)
+  })
+
+  it('uses serve aim as the server racket direction without changing the receiver', () => {
+    const state = makeState(1)
+
+    setServeAim(state, { x: -1, y: 0 })
+
+    expect(state.players[1].racketDirection).toBe(-1)
+    expect(state.players[0].racketDirection).toBe(1)
+  })
+
+  it('uses horizontal return aim as the racket direction at contact', () => {
+    const state = makeState()
+    const receiver = state.players[0]
+    receiver.input = { x: -1, y: -1 }
+    receiver.racketDirection = 1
+    launch(state, {
+      x: receiver.x,
+      y: receiver.y - 20,
+      z: 30,
+      vx: 0,
+      vy: 180,
+      vz: 0,
+      lastHitter: 1,
+    })
+
+    advanceUntil(state, (next) => next.ball.lastHitter === 0, 500)
+
+    expect(state.players[0].racketDirection).toBe(-1)
+  })
+
+  it('uses the laptop shot target instead of its interception direction at contact', () => {
+    const aiPlayers = [
+      players[0],
+      { ...players[1], kind: 'ai', difficulty: 'hard' },
+    ]
+    const state = makeState(0, aiPlayers)
+    const receiver = state.players[1]
+    state.ai[1].movement = { x: 1, y: 0 }
+    state.ai[1].shotAim = { x: -1, y: 1 }
+    state.ai[1].cooldownMs = 1000
+    receiver.racketDirection = 1
+    launch(state, {
+      x: receiver.x,
+      y: receiver.y + 20,
+      z: 30,
+      vx: 0,
+      vy: -180,
+      vz: 0,
+      lastHitter: 0,
+    })
+
+    advanceUntil(state, (next) => next.ball.lastHitter === 1, 500)
+
+    expect(state.players[1].racketDirection).toBe(-1)
+  })
+
   it('stays inside the playable half and side boundaries during realistic fixed-step play', () => {
     const state = makeState()
     state.phase = 'rally'

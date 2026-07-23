@@ -80,16 +80,21 @@ function silhouette(monster, offset) {
   ]
 }
 
-export function spritePlan(monsterId, pose) {
+export function spritePlan(monsterId, pose, racketSideOverride) {
   const monster = MONSTERS.find((entry) => entry.id === monsterId)
   if (!monster) throw new Error(`Unknown monster id: ${monsterId}`)
 
   const offset = POSE[pose]
   if (!offset) throw new Error(`Unknown monster pose: ${pose}`)
 
-  const racketHeadX = offset.racketSide * 7 + offset.racketX
-  const racketHandleX = racketHeadX + offset.racketSide
-  const armStartX = offset.bodyX + offset.racketSide * 4
+  const defaultRacketHeadX = offset.racketSide * 7 + offset.racketX
+  const defaultRacketSide = Math.sign(defaultRacketHeadX) || 1
+  const racketSide = racketSideOverride == null
+    ? defaultRacketSide
+    : Math.sign(racketSideOverride) || defaultRacketSide
+  const racketHeadX = racketSide * Math.abs(defaultRacketHeadX)
+  const racketHandleX = racketHeadX + racketSide
+  const armStartX = offset.bodyX + racketSide * 4
   const armStartY = offset.bodyY - 2
   const armEndX = racketHandleX + 1
   const armEndY = offset.racketY + 2

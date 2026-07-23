@@ -40,6 +40,13 @@ const normalize = (vector) => {
 const halfForY = (y) => (y < NET_Y ? 1 : 0)
 const SERVICE_MARGIN = 12
 const SERVICE_NET_MARGIN = 52
+const RACKET_DIRECTION_DEAD_ZONE = 0.05
+
+function rememberRacketDirection(player, horizontalAim) {
+  if (Math.abs(horizontalAim) > RACKET_DIRECTION_DEAD_ZONE) {
+    player.racketDirection = horizontalAim < 0 ? -1 : 1
+  }
+}
 
 export const movementSpeed = (build) =>
   PLAYER_BASE_SPEED + build.footwork * PLAYER_SPEED_PER_STAT
@@ -73,11 +80,11 @@ export function createSimulation(match) {
     players: [
       {
         x: WORLD_W / 2, y: COURT_BOTTOM - 52, input: { x: 0, y: 0 },
-        recoveryMs: 0, pose: 'idle', ...match.players[0],
+        recoveryMs: 0, pose: 'idle', racketDirection: 1, ...match.players[0],
       },
       {
         x: WORLD_W / 2, y: COURT_TOP + 52, input: { x: 0, y: 0 },
-        recoveryMs: 0, pose: 'idle', ...match.players[1],
+        recoveryMs: 0, pose: 'idle', racketDirection: 1, ...match.players[1],
       },
     ],
     ball: {
@@ -94,17 +101,22 @@ function emitCue(state, name) {
 }
 
 export function setMovement(state, playerIndex, vector) {
-  state.players[playerIndex].input = normalize({
+  const player = state.players[playerIndex]
+  const input = normalize({
     x: clamp(Number(vector.x) || 0, -1, 1),
     y: clamp(Number(vector.y) || 0, -1, 1),
   })
+  player.input = input
+  rememberRacketDirection(player, input.x)
 }
 
 export function setServeAim(state, vector) {
-  state.serveAim = normalize({
+  const aim = normalize({
     x: clamp(Number(vector.x) || 0, -1, 1),
     y: clamp(Number(vector.y) || 0, -1, 1),
   })
+  state.serveAim = aim
+  rememberRacketDirection(state.players[state.match.currentServer], aim.x)
 }
 
 export function serviceBoxFor(match) {
@@ -225,6 +237,7 @@ function returnBall(state, playerIndex, rng) {
     length(player.input) > 0.05 ? player.input : { x: 0, y: direction }
   )
   const speed = shotSpeed(rating)
+  rememberRacketDirection(player, aim.x)
   const aimX = clamp(aim.x + placementError(rating, rng), -1, 1)
   const forward = clamp(aim.y * direction, -1, 1)
   state.ball.vx = aimX * speed * 0.72
