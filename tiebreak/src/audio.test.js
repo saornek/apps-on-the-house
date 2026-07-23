@@ -24,9 +24,19 @@ describe('mute preference', () => {
 })
 
 describe('audio cues', () => {
-  it('stays lazy and plays every named profile with a synchronous resume implementation', () => {
+  it('stays lazy and plays every named frequency and duration profile', () => {
     const originalAudioContext = globalThis.AudioContext
+    const profiles = [
+      ['serve', 260, 0.06],
+      ['hit', 420, 0.045],
+      ['bounce', 180, 0.035],
+      ['net', 95, 0.12],
+      ['point', 520, 0.13],
+      ['win', 660, 0.28],
+    ]
     const frequencies = []
+    const rampTimes = []
+    const stopTimes = []
     let contexts = 0
 
     class FakeAudioContext {
@@ -49,7 +59,9 @@ describe('audio cues', () => {
             return this
           },
           start() {},
-          stop() {},
+          stop(time) {
+            stopTimes.push(time)
+          },
         }
       }
 
@@ -57,7 +69,9 @@ describe('audio cues', () => {
         return {
           gain: {
             setValueAtTime() {},
-            exponentialRampToValueAtTime() {},
+            exponentialRampToValueAtTime(_value, time) {
+              rampTimes.push(time)
+            },
           },
           connect() {
             return this
@@ -74,12 +88,14 @@ describe('audio cues', () => {
       audio.play('serve', true)
       expect(contexts).toBe(0)
 
-      for (const cue of ['serve', 'hit', 'bounce', 'net', 'point', 'win']) {
+      for (const [cue] of profiles) {
         expect(() => audio.play(cue)).not.toThrow()
       }
 
       expect(contexts).toBe(1)
-      expect(frequencies).toEqual([260, 420, 180, 95, 520, 660])
+      expect(frequencies).toEqual(profiles.map(([, frequency]) => frequency))
+      expect(rampTimes).toEqual(profiles.map(([, , duration]) => 10 + duration))
+      expect(stopTimes).toEqual(profiles.map(([, , duration]) => 10 + duration))
     } finally {
       if (originalAudioContext) globalThis.AudioContext = originalAudioContext
       else delete globalThis.AudioContext

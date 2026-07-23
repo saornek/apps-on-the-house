@@ -29,17 +29,7 @@ async function cacheShell() {
 
   const shellUrls = new Set(CORE_SHELL.map(scopedUrl))
   for (const assetUrl of builtAssets) shellUrls.add(assetUrl)
-  shellUrls.delete(indexUrl)
-  shellUrls.delete(appRoot)
-
-  await Promise.all([
-    cache.put(indexUrl, indexResponse.clone()),
-    cache.put(appRoot, indexResponse.clone()),
-    ...[...shellUrls].map(async (url) => {
-      const response = await fetchForInstall(url)
-      await cache.put(url, response)
-    }),
-  ])
+  await cache.addAll([...shellUrls])
 }
 
 self.addEventListener('install', (event) => {
