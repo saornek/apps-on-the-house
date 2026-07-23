@@ -1,6 +1,6 @@
 # Tiebreak Racket Direction Design
 
-**Date:** 2026-07-23  
+**Date:** 2026-07-23
 **Status:** Approved in conversation; awaiting written-spec review
 
 ## Goal
@@ -76,4 +76,3 @@ The production build will be checked in the browser by:
 3. tapping right and capturing the screen-right racket pose;
 4. confirming both players remain readable, attached, and unobstructed at game
    scale.
-

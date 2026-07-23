@@ -299,11 +299,11 @@ function stepBall(state, dt, rng) {
     const inside =
       state.ball.x >= COURT_LEFT && state.ball.x <= COURT_RIGHT &&
       state.ball.y >= COURT_TOP && state.ball.y <= COURT_BOTTOM
-    if (!inside) {
+    const bounceHalf = halfForY(state.ball.y)
+    if (!inside || bounceHalf !== 1 - state.ball.lastHitter) {
       finishPoint(state, 1 - state.ball.lastHitter, 'out')
       return
     }
-    const bounceHalf = halfForY(state.ball.y)
     state.ball.groundContacts = 1
     state.ball.firstBounceHalf = bounceHalf
     state.ball.bouncesInHalf = 1

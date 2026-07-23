@@ -15,11 +15,14 @@ import {
   swingRecovery,
 } from './simulation.js'
 import {
+  BOUNCE_FACTOR,
   COURT_BOTTOM,
   COURT_LEFT,
   COURT_RIGHT,
   COURT_TOP,
   FIXED_STEP_MS,
+  GRAVITY,
+  NET_HEIGHT,
   NET_Y,
   PLAYER_MAX_X,
   PLAYER_MIN_X,
@@ -232,6 +235,47 @@ describe('legal serving', () => {
 describe('terminal ball trajectories', () => {
   it.each([
     {
+      name: 'player 0 bottom half',
+      ball: { x: 120, y: 410, z: 5, vx: 0, vy: -100, vz: -300, lastHitter: 0 },
+      winner: 1,
+      illegalHalf: 0,
+    },
+    {
+      name: 'player 1 top half',
+      ball: { x: 360, y: 310, z: 5, vx: 0, vy: 100, vz: -300, lastHitter: 1 },
+      winner: 0,
+      illegalHalf: 1,
+    },
+  ])('calls $name first contact out before recording a legal bounce', ({
+    ball,
+    illegalHalf,
+    winner,
+  }) => {
+    const state = makeState()
+    const impactTime = (
+      ball.vz + Math.sqrt(ball.vz ** 2 + 2 * GRAVITY * ball.z)
+    ) / GRAVITY
+    const contactY = ball.y + ball.vy * impactTime
+    const reboundVz = Math.abs(ball.vz - GRAVITY * impactTime) * BOUNCE_FACTOR
+    const timeFromBounceToNet = Math.abs(NET_Y - contactY) / Math.abs(ball.vy)
+    const hypotheticalNetHeight =
+      reboundVz * timeFromBounceToNet -
+      GRAVITY * timeFromBounceToNet ** 2 / 2
+
+    launch(state, ball)
+    advanceUntil(state, (next) => next.phase === 'point-result')
+
+    expect(hypotheticalNetHeight).toBeGreaterThan(NET_HEIGHT)
+    expect(state.match.lastPoint).toEqual({ winner, reason: 'out' })
+    expect(state.ball.firstBounceHalf).toBeNull()
+    expect(state.ball.groundContacts).toBe(0)
+    expect(state.ball.bouncesInHalf).toBe(0)
+    expect(state.ball.bounceHalf).toBeNull()
+    expect(illegalHalf).toBe(ball.lastHitter)
+  })
+
+  it.each([
+    {
       name: 'top receiver half',
       ball: { x: 360, y: 400, vx: 55, vy: -120, lastHitter: 0 },
       winner: 0,
@@ -279,7 +323,7 @@ describe('terminal ball trajectories', () => {
 
   it('calls a low crossing at the net plane a net fault', () => {
     const state = makeState()
-    launch(state, { y: 400, z: 5, vx: 0, vy: -200, vz: 0 })
+    launch(state, { y: 400, z: 20, vx: 0, vy: -200, vz: 0 })
 
     advanceUntil(state, (next) => next.phase === 'point-result')
 

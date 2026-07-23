@@ -43,7 +43,7 @@ function monsterFor(monsterId) {
   return MONSTERS.find((monster) => monster.id === monsterId)
 }
 
-function IntroScreen({ players, onStart }) {
+function IntroScreen({ players, openingServer, onStart }) {
   useEffect(() => {
     const timer = window.setTimeout(onStart, 1800)
     return () => window.clearTimeout(timer)
@@ -77,6 +77,7 @@ function IntroScreen({ players, onStart }) {
           )
         })}
       </section>
+      <p>{players[openingServer].name} serves first.</p>
       <p className="intro-countdown" aria-live="polite">Match starts in a moment…</p>
     </main>
   )
@@ -179,7 +180,7 @@ export default function App() {
   }
 
   if (state.phase === 'intro') {
-    return <IntroScreen players={state.players} onStart={startMatch} />
+    return <IntroScreen players={state.players} openingServer={state.openingServer} onStart={startMatch} />
   }
 
   if (state.phase === 'match') {

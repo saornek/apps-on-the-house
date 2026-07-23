@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import {
   appReducer,
@@ -5,6 +6,8 @@ import {
   loadLastMonster,
   saveLastMonster,
 } from './appState.js'
+
+const APP_SOURCE = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
 
 describe('single-player flow', () => {
   it('collects mode, difficulty, and one human setup', () => {
@@ -41,6 +44,33 @@ describe('two-player flow', () => {
     })
     expect(state.phase).toBe('intro')
     expect(state.players.map((player) => player.monsterId)).toEqual(['mossbyte', 'blinkblob'])
+  })
+})
+
+describe('intro opening server', () => {
+  it('passes the setup server to the intro and names that player as first server', () => {
+    let state = appReducer(initialAppState(), { type: 'choose-mode', mode: 'local' })
+    state = { ...state, openingServer: 1 }
+    state = appReducer(state, {
+      type: 'confirm-player',
+      monsterId: 'mossbyte',
+      build: state.draftBuild,
+    })
+    state = appReducer(state, {
+      type: 'confirm-player',
+      monsterId: 'blinkblob',
+      build: state.draftBuild,
+    })
+
+    expect(state.phase).toBe('intro')
+    expect(state.players[state.openingServer].name).toBe('Player 2')
+    expect(APP_SOURCE).toContain(
+      'function IntroScreen({ players, openingServer, onStart })',
+    )
+    expect(APP_SOURCE).toContain('{players[openingServer].name} serves first.')
+    expect(APP_SOURCE).toContain(
+      '<IntroScreen players={state.players} openingServer={state.openingServer} onStart={startMatch} />',
+    )
   })
 })
 

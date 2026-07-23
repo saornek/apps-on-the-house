@@ -43,6 +43,12 @@ function combinedMovement(first, second) {
   return magnitude > 1 ? { x: x / magnitude, y: y / magnitude } : { x, y }
 }
 
+export function routePlayerMovements(singlePlayer, playerOneInput, playerTwoInput) {
+  return singlePlayer
+    ? [combinedMovement(playerOneInput, playerTwoInput), ZERO_MOVEMENT]
+    : [playerOneInput, playerTwoInput]
+}
+
 function snapshotKey(state) {
   const { currentServer, lastPoint, scores } = state.match
   return [
@@ -155,10 +161,11 @@ export default function GameCanvas({
         const playerTwoInput = movementForPlayer(inputRef.current, 1)
         const opponent = state.match.players[1]
         const singlePlayer = opponent.kind === 'ai'
-        let playerOneMovement = singlePlayer
-          ? combinedMovement(playerOneInput, playerTwoInput)
-          : playerOneInput
-        let playerTwoMovement = playerTwoInput
+        let [playerOneMovement, playerTwoMovement] = routePlayerMovements(
+          singlePlayer,
+          playerOneInput,
+          playerTwoInput,
+        )
 
         if (state.phase === 'countdown') {
           const serveMovement = state.match.currentServer === 0
