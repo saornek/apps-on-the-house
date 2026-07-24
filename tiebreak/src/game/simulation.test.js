@@ -181,6 +181,35 @@ describe('players', () => {
 })
 
 describe('legal serving', () => {
+  it('lets the hard laptop return a normal legal first serve', () => {
+    const state = makeState(0, [
+      players[0],
+      {
+        kind: 'ai',
+        difficulty: 'hard',
+        name: 'COM',
+        monsterId: 'pebblefang',
+        build: { forehand: 5, backhand: 4, serve: 4, footwork: 7 },
+      },
+    ])
+
+    let sawLegalServiceBounce = false
+    startServe(state, () => 0.5)
+    advanceUntil(
+      state,
+      (next) => {
+        sawLegalServiceBounce ||= next.ball.groundContacts === 1
+        return next.ball.lastHitter === 1 || next.phase === 'point-result'
+      },
+      3000,
+    )
+
+    expect(sawLegalServiceBounce).toBe(true)
+    expect(state.phase).toBe('rally')
+    expect(state.ball.lastHitter).toBe(1)
+    expect(state.cue).toBe('hit')
+  })
+
   it('lands every rating and aim extreme inside the selected service box for both servers', () => {
     for (const serverIndex of [0, 1]) {
       for (const totalPoints of [0, 1]) {
@@ -403,7 +432,8 @@ describe('fixed-step outcomes', () => {
     }
 
     expect(oneFrame.ai[1].movement).not.toEqual({ x: 0, y: 0 })
-    expect(oneFrame.ball.groundContacts).toBeGreaterThanOrEqual(1)
+    expect(oneFrame.ball.lastHitter).toBe(1)
+    expect(oneFrame.ball.isServe).toBe(false)
     expect(manyFrames).toEqual(oneFrame)
   })
 })

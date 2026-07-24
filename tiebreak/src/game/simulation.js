@@ -90,7 +90,7 @@ export function createSimulation(match) {
     ball: {
       live: false, x: WORLD_W / 2, y: COURT_BOTTOM - 72, z: 28,
       vx: 0, vy: 0, vz: 0, lastHitter: null, bounceHalf: null, bouncesInHalf: 0,
-      groundContacts: 0, firstBounceHalf: null,
+      groundContacts: 0, firstBounceHalf: null, isServe: false,
     },
   }
 }
@@ -188,6 +188,7 @@ export function startServe(state, rng = Math.random) {
     bouncesInHalf: 0,
     groundContacts: 0,
     firstBounceHalf: null,
+    isServe: true,
   }
   server.pose = 'serve'
   server.recoveryMs = 300
@@ -248,6 +249,7 @@ function returnBall(state, playerIndex, rng) {
   state.ball.bouncesInHalf = 0
   state.ball.groundContacts = 0
   state.ball.firstBounceHalf = null
+  state.ball.isServe = false
   player.pose = stroke
   player.recoveryMs = swingRecovery(player.build)
   emitCue(state, 'hit')
@@ -262,7 +264,14 @@ function tryAutomaticReturns(state, rng) {
       Math.abs(state.ball.y - player.y) <= REACH_Y &&
       state.ball.z >= CONTACT_MIN_Z &&
       state.ball.z <= CONTACT_MAX_Z
-    if (state.ball.live && ballApproaches && inReach && player.recoveryMs <= 0) {
+    const serveCanBeReturned = !state.ball.isServe || state.ball.groundContacts > 0
+    if (
+      state.ball.live &&
+      ballApproaches &&
+      inReach &&
+      serveCanBeReturned &&
+      player.recoveryMs <= 0
+    ) {
       returnBall(state, index, rng)
       return
     }
