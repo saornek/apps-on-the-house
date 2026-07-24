@@ -1,0 +1,13 @@
+:root {
+  --ink: #173a42;
+  --night: #102f38;
+  --cream: #fff3cf;
+  --clay: #cf6f45;
+  --clay-dark: #a74e36;
+  --sun: #ffd054;
+  --mint: #77d6bf;
+  --pink: #ef8fa8;
+  --panel: #f8e5b8;
+  --font-pixel: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+}

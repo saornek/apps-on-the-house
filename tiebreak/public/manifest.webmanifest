@@ -1,0 +1,14 @@
+{
+  "name": "Tiebreak",
+  "short_name": "Tiebreak",
+  "description": "Fast pixel tennis against the laptop or a local second player. Free, no ads, works offline.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#102F38",
+  "theme_color": "#CF6F45",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
