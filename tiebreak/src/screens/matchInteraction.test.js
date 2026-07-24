@@ -34,14 +34,24 @@ describe('match pause interaction', () => {
     expect(actions.resume).not.toHaveBeenCalled()
   })
 
-  it('resumes on Escape while paused', () => {
+  it('does not resume on Escape while paused', () => {
     const event = escapeEvent()
     const actions = { focusPause: vi.fn(), pause: vi.fn(), resume: vi.fn() }
 
     handleMatchEscape(event, true, actions)
 
-    expect(actions.resume).toHaveBeenCalledOnce()
+    expect(event.preventDefault).toHaveBeenCalledOnce()
+    expect(event.stopPropagation).toHaveBeenCalledOnce()
+    expect(actions.resume).not.toHaveBeenCalled()
     expect(actions.pause).not.toHaveBeenCalled()
+  })
+
+  it('disables the pause dialog ModalBoundary Escape close path', () => {
+    const pauseDialogBoundary = MATCH_SCREEN_SOURCE.match(
+      /function PauseDialog[\s\S]*?<ModalBoundary([\s\S]*?)>/,
+    )?.[1] ?? ''
+
+    expect(pauseDialogBoundary).toMatch(/closeOnEscape=\{false\}/)
   })
 
   it('ignores repeated Escape keydown events', () => {
@@ -69,16 +79,26 @@ describe('match pause interaction', () => {
 })
 
 describe('match instructions', () => {
-  it('keeps the short hint concise and uses confirmed names in detailed controls', () => {
+  it('assigns both keyboard control schemes to player one against AI', () => {
     const instructions = helpInstructions([
-      { name: 'Nova' },
-      { name: 'Orbit' },
-    ]).join(' ')
+      { name: 'Nova', kind: 'human' },
+      { name: 'COM', kind: 'ai' },
+    ])
+
+    expect(instructions).toContain('Nova uses W A S D or the arrow keys.')
+    expect(instructions.join(' ')).not.toMatch(/COM uses/)
+    expect(instructions).toContain('Touch players drag on their half of the court.')
+  })
+
+  it('keeps separate keyboard controls and touch help in local mode', () => {
+    const instructions = helpInstructions([
+      { name: 'Nova', kind: 'human' },
+      { name: 'Orbit', kind: 'human' },
+    ])
 
     expect(ONBOARDING_HINT).not.toMatch(/W A S D|arrow keys|Touch/i)
-    expect(instructions).toMatch(/Nova uses W A S D/)
-    expect(instructions).toMatch(/Orbit uses the arrow keys/)
-    expect(instructions).toMatch(/Touch/)
+    expect(instructions).toContain('Nova uses W A S D. Orbit uses the arrow keys.')
+    expect(instructions).toContain('Touch players drag on their half of the court.')
     expect(MATCH_SCREEN_SOURCE).not.toContain('className="match-controls"')
   })
 })

@@ -8,7 +8,13 @@ import {
   restoreFocus,
 } from './modalFocus.js'
 
-export default function ModalBoundary({ labelledBy, className = '', onClose, children }) {
+export default function ModalBoundary({
+  labelledBy,
+  className = '',
+  closeOnEscape = true,
+  onClose,
+  children,
+}) {
   const dialogRef = useRef(null)
   const closeRef = useRef(onClose)
   const [portalNode] = useState(() => {
@@ -48,7 +54,9 @@ export default function ModalBoundary({ labelledBy, className = '', onClose, chi
         aria-labelledby={labelledBy}
         tabIndex="-1"
         onKeyDown={(event) => {
-          handleModalKeyDown(event, dialogRef.current, () => closeRef.current())
+          handleModalKeyDown(event, dialogRef.current, () => {
+            if (closeOnEscape) closeRef.current()
+          })
         }}
       >
         {children}

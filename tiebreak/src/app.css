@@ -185,12 +185,13 @@ button:not(:disabled):active {
 }
 
 .button--primary {
-  background: var(--clay);
+  background: var(--clay-dark);
   color: var(--cream);
 }
 
 .button--primary:hover {
   background: var(--clay-dark);
+  filter: brightness(0.88);
 }
 
 .button--quiet {
@@ -347,7 +348,7 @@ legend {
 }
 
 .monster-card[aria-pressed="true"] {
-  background: var(--clay);
+  background: var(--clay-dark);
   color: var(--cream);
   transform: translate(3px, 3px);
   box-shadow: 1px 1px 0 var(--ink);
@@ -688,7 +689,7 @@ button:disabled {
 
 .share-link:hover,
 .share-link:focus-visible {
-  background: var(--clay);
+  background: var(--clay-dark);
   color: var(--cream);
 }
 

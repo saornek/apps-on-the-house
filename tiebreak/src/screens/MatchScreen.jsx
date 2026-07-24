@@ -13,6 +13,7 @@ function PauseDialog({ players, showingHelp, onShowHelp, onResume, onHome }) {
     <ModalBoundary
       labelledBy="pause-title"
       className="pause-dialog"
+      closeOnEscape={false}
       onClose={onResume}
     >
       <p className="eyebrow">Time out</p>
@@ -80,10 +81,6 @@ export default function MatchScreen({
   }, [])
 
   useEffect(() => {
-    const resume = () => {
-      setShowingHelp(false)
-      setPaused(false)
-    }
     const handleKeyDown = (event) => {
       handleMatchEscape(event, paused, {
         focusPause: () => pauseButtonRef.current?.focus(),
@@ -91,7 +88,6 @@ export default function MatchScreen({
           setShowingHelp(false)
           setPaused(true)
         },
-        resume,
       })
     }
     window.addEventListener('keydown', handleKeyDown)
