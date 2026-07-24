@@ -1,3 +1,5 @@
+import React from 'react'
+import { validatePlayerName } from '../appState.js'
 import { STAT_KEYS, validateBuild } from '../game/match.js'
 import { MONSTERS } from '../game/roster.js'
 import MonsterFigure from './MonsterFigure.jsx'
@@ -12,20 +14,33 @@ const STAT_LABELS = {
 export default function SetupScreen({
   mode,
   setupIndex,
-  selectedMonster,
-  draftBuild,
+  draft,
+  otherName,
+  onBack,
+  onChangeName,
   onSelectMonster,
   onChangeStat,
   onReset,
   onReady,
 }) {
-  const validation = validateBuild(draftBuild)
+  const buildValidation = validateBuild(draft.build)
+  const nameValidation = mode === 'local'
+    ? validatePlayerName(draft.name, otherName)
+    : { valid: true, normalized: draft.name, error: null }
+  const ready = buildValidation.valid && nameValidation.valid
   const heading = mode === 'single' ? 'Build your monster' : `Player ${setupIndex + 1}`
   const topTouchSetup = mode === 'local' && setupIndex === 1
 
   return (
     <main className={topTouchSetup ? 'screen setup-screen setup-screen--top-touch' : 'screen setup-screen'}>
       <header className="screen-heading">
+        <button
+          className="button button--quiet setup-back"
+          type="button"
+          onClick={onBack}
+        >
+          Back
+        </button>
         <p className="eyebrow">Pick your racket beast</p>
         <h1 data-screen-heading tabIndex="-1">{heading}</h1>
         <p>Spend exactly 20 stat points.</p>
@@ -35,14 +50,37 @@ export default function SetupScreen({
         className="setup-form"
         onSubmit={(event) => {
           event.preventDefault()
-          if (validation.valid) onReady()
+          if (ready) onReady()
         }}
       >
+        {mode === 'local' && (
+          <div className="name-field">
+            <label htmlFor="player-name">Player name</label>
+            <input
+              id="player-name"
+              name="player-name"
+              type="text"
+              value={draft.name}
+              maxLength={10}
+              autoComplete="off"
+              aria-invalid={!nameValidation.valid}
+              aria-describedby="player-name-status"
+              onChange={(event) => onChangeName(event.target.value)}
+            />
+            <p
+              id="player-name-status"
+              className={nameValidation.valid ? 'name-status' : 'name-status name-status--error'}
+              aria-live="polite"
+            >
+              {nameValidation.error ?? '1–10 characters.'}
+            </p>
+          </div>
+        )}
         <fieldset className="monster-picker">
           <legend>Monster</legend>
           <div className="monster-grid">
             {MONSTERS.map((monster) => {
-              const selected = monster.id === selectedMonster
+              const selected = monster.id === draft.monsterId
               return (
                 <button
                   className="monster-card"
@@ -72,12 +110,12 @@ export default function SetupScreen({
               >
                 −
               </button>
-              <output aria-labelledby={`${stat}-label`}>{draftBuild[stat]}</output>
+              <output aria-labelledby={`${stat}-label`}>{draft.build[stat]}</output>
               <meter
                 aria-labelledby={`${stat}-label`}
                 min="1"
                 max="9"
-                value={draftBuild[stat]}
+                value={draft.build[stat]}
               />
               <button
                 className="stat-stepper"
@@ -89,11 +127,11 @@ export default function SetupScreen({
               </button>
             </div>
           ))}
-          <p className={validation.valid ? 'budget budget--ready' : 'budget'} aria-live="polite">
-            {validation.valid
+          <p className={buildValidation.valid ? 'budget budget--ready' : 'budget'} aria-live="polite">
+            {buildValidation.valid
               ? '20 / 20 · Ready'
-              : `${Math.abs(validation.remaining)} point${Math.abs(validation.remaining) === 1 ? '' : 's'} ${
-                validation.remaining > 0 ? 'left' : 'over'
+              : `${Math.abs(buildValidation.remaining)} point${Math.abs(buildValidation.remaining) === 1 ? '' : 's'} ${
+                buildValidation.remaining > 0 ? 'left' : 'over'
               }`}
           </p>
         </fieldset>
@@ -102,7 +140,7 @@ export default function SetupScreen({
           <button className="button button--quiet" type="button" onClick={onReset}>
             Reset
           </button>
-          <button className="button button--primary" type="submit" disabled={!validation.valid}>
+          <button className="button button--primary" type="submit" disabled={!ready}>
             Ready
           </button>
         </div>

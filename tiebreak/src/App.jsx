@@ -116,8 +116,11 @@ function MatchSession({
 }
 
 export default function App() {
-  const [state, dispatch] = useReducer(appReducer, undefined, initialAppState)
-  const [selectedMonster, setSelectedMonster] = useState(loadLastMonster)
+  const [state, dispatch] = useReducer(
+    appReducer,
+    undefined,
+    () => initialAppState(loadLastMonster()),
+  )
   const [muted, setMuted] = useState(loadMute)
   const audioRef = useRef(null)
   audioRef.current ??= createAudio()
@@ -139,12 +142,12 @@ export default function App() {
         muted={muted}
         onChooseMode={(mode) => {
           audioRef.current.unlock(muted)
-          dispatch({ type: 'choose-mode', mode })
+          dispatch({ type: 'choose-mode', mode, monsterId: loadLastMonster() })
         }}
         onChooseDifficulty={(difficulty) => {
           dispatch({ type: 'choose-difficulty', difficulty })
         }}
-        onBack={returnHome}
+        onBack={() => dispatch({ type: 'back' })}
         onToggleMute={() => {
           setMuted((value) => {
             const next = !value
@@ -162,18 +165,22 @@ export default function App() {
       <SetupScreen
         mode={state.mode}
         setupIndex={state.setupIndex}
-        selectedMonster={selectedMonster}
-        draftBuild={state.draftBuild}
-        onSelectMonster={setSelectedMonster}
+        draft={state.drafts[state.setupIndex]}
+        otherName={
+          state.mode === 'local'
+            ? state.drafts[1 - state.setupIndex].name
+            : undefined
+        }
+        onBack={() => dispatch({ type: 'back' })}
+        onChangeName={(name) => dispatch({ type: 'change-draft-name', name })}
+        onSelectMonster={(monsterId) => {
+          dispatch({ type: 'select-draft-monster', monsterId })
+        }}
         onChangeStat={(stat, delta) => dispatch({ type: 'change-stat', stat, delta })}
         onReset={() => dispatch({ type: 'reset-build' })}
         onReady={() => {
-          saveLastMonster(selectedMonster)
-          dispatch({
-            type: 'confirm-player',
-            monsterId: selectedMonster,
-            build: state.draftBuild,
-          })
+          saveLastMonster(state.drafts[state.setupIndex].monsterId)
+          dispatch({ type: 'confirm-player' })
         }}
       />
     )

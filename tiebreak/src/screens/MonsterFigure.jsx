@@ -1,3 +1,4 @@
+import React from 'react'
 import { spritePlan } from '../game/roster.js'
 
 export default function MonsterFigure({ monsterId, pose = 'idle', label, className = '' }) {

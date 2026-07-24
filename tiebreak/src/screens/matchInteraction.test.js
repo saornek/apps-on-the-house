@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  HELP_INSTRUCTIONS,
+  helpInstructions,
   ONBOARDING_HINT,
   advanceLiveFrame,
   handleMatchEscape,
@@ -69,11 +69,16 @@ describe('match pause interaction', () => {
 })
 
 describe('match instructions', () => {
-  it('keeps the short onboarding hint concise and detailed controls in help', () => {
+  it('keeps the short hint concise and uses confirmed names in detailed controls', () => {
+    const instructions = helpInstructions([
+      { name: 'Nova' },
+      { name: 'Orbit' },
+    ]).join(' ')
+
     expect(ONBOARDING_HINT).not.toMatch(/W A S D|arrow keys|Touch/i)
-    expect(HELP_INSTRUCTIONS.join(' ')).toMatch(/W A S D/)
-    expect(HELP_INSTRUCTIONS.join(' ')).toMatch(/arrow keys/)
-    expect(HELP_INSTRUCTIONS.join(' ')).toMatch(/Touch/)
+    expect(instructions).toMatch(/Nova uses W A S D/)
+    expect(instructions).toMatch(/Orbit uses the arrow keys/)
+    expect(instructions).toMatch(/Touch/)
     expect(MATCH_SCREEN_SOURCE).not.toContain('className="match-controls"')
   })
 })

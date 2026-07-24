@@ -273,6 +273,51 @@ button:not(:disabled):active {
   font-size: clamp(2.5rem, 8vw, 5rem);
 }
 
+.screen-heading .setup-back {
+  margin: 0 auto 1rem 0;
+}
+
+.name-field {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.name-field label {
+  font-family: var(--font-pixel);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.name-field input {
+  min-height: 3.25rem;
+  padding: 0.65rem 0.8rem;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.name-field input:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--ink);
+}
+
+.name-status {
+  min-height: 1.25rem;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.name-status--error {
+  color: var(--clay-dark);
+}
+
 fieldset {
   padding: 0;
   border: 0;
@@ -591,6 +636,10 @@ button:disabled {
 .result-actions .button {
   min-width: 9rem;
   margin: 0;
+}
+
+.result-actions {
+  flex-wrap: wrap;
 }
 
 .monster-figure--win {

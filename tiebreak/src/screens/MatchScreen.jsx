@@ -3,12 +3,12 @@ import GameCanvas from '../GameCanvas.jsx'
 import ModalBoundary from './ModalBoundary.jsx'
 import { countdownFeedback, pointResultMessage } from './matchFeedback.js'
 import {
-  HELP_INSTRUCTIONS,
+  helpInstructions,
   ONBOARDING_HINT,
   handleMatchEscape,
 } from './matchInteraction.js'
 
-function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
+function PauseDialog({ players, showingHelp, onShowHelp, onResume, onHome }) {
   return (
     <ModalBoundary
       labelledBy="pause-title"
@@ -19,7 +19,7 @@ function PauseDialog({ showingHelp, onShowHelp, onResume, onHome }) {
       <h2 id="pause-title">{showingHelp ? 'How to play' : 'Match paused'}</h2>
       {showingHelp ? (
         <>
-          {HELP_INSTRUCTIONS.map((instruction) => (
+          {helpInstructions(players).map((instruction) => (
             <p key={instruction}>{instruction}</p>
           ))}
         </>
@@ -180,6 +180,7 @@ export default function MatchScreen({
       </p>
       {paused && (
         <PauseDialog
+          players={players}
           showingHelp={showingHelp}
           onShowHelp={() => setShowingHelp(true)}
           onResume={() => {
