@@ -65,6 +65,23 @@ describe('player name validation', () => {
   })
 })
 
+describe('single-player setup names', () => {
+  it('keeps Player 1 when a draft-name action is dispatched directly', () => {
+    let state = appReducer(initialAppState(), {
+      type: 'choose-mode',
+      mode: 'single',
+      monsterId: 'mossbyte',
+    })
+    state = appReducer(state, { type: 'choose-difficulty', difficulty: 'normal' })
+    state = appReducer(state, { type: 'change-draft-name', name: 'Nova' })
+
+    expect(state.drafts[0].name).toBe('Player 1')
+
+    state = appReducer(state, { type: 'confirm-player' })
+    expect(state.players[0].name).toBe('Player 1')
+  })
+})
+
 describe('single-player flow', () => {
   it('collects mode, difficulty, and one human setup', () => {
     let state = initialAppState()

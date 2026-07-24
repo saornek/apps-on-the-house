@@ -117,6 +117,7 @@ export function appReducer(state, action) {
     case 'choose-difficulty':
       return { ...state, difficulty: action.difficulty, phase: 'setup' }
     case 'change-draft-name':
+      if (state.mode !== 'local') return state
       return updateActiveDraft(state, (draft) => ({ ...draft, name: action.name }))
     case 'select-draft-monster':
       return updateActiveDraft(state, (draft) => ({
