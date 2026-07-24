@@ -642,6 +642,56 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.share-wrap {
+  position: relative;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 12rem;
+  margin: 0;
+  background: var(--sun);
+  color: var(--ink);
+}
+
+.share-menu {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 0.75rem);
+  left: 50%;
+  display: grid;
+  width: min(16rem, calc(100vw - 2rem));
+  padding: 0.55rem;
+  border: 3px solid var(--ink);
+  background: var(--panel);
+  box-shadow: 5px 5px 0 var(--ink);
+  transform: translateX(-50%);
+}
+
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 900;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.share-link:hover,
+.share-link:focus-visible {
+  background: var(--clay);
+  color: var(--cream);
+}
+
 .monster-figure--win {
   animation: victory-hop 650ms steps(2, jump-none) infinite;
 }

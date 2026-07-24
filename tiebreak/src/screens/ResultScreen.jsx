@@ -1,4 +1,6 @@
+import React from 'react'
 import { MONSTERS } from '../game/roster.js'
+import ShareButton, { challengeText } from '../ShareButton.jsx'
 import MonsterFigure from './MonsterFigure.jsx'
 
 function monsterName(monsterId) {
@@ -46,6 +48,7 @@ export default function ResultScreen({ match, onRematch, onHome }) {
         <button className="button button--primary" type="button" onClick={onRematch}>
           Rematch
         </button>
+        <ShareButton text={challengeText(match)} />
         <button className="button button--quiet" type="button" onClick={onHome}>
           Home
         </button>
