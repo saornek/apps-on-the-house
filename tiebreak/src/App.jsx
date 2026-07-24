@@ -39,6 +39,33 @@ function useReducedMotion() {
   return reducedMotion
 }
 
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() =>
+    globalThis.matchMedia?.(query).matches ?? false,
+  )
+
+  useEffect(() => {
+    const media = globalThis.matchMedia?.(query)
+    if (!media) return undefined
+    const update = () => setMatches(media.matches)
+    update()
+    if (media.addEventListener) {
+      media.addEventListener('change', update)
+    } else {
+      media.addListener?.(update)
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener('change', update)
+      } else {
+        media.removeListener?.(update)
+      }
+    }
+  }, [query])
+
+  return matches
+}
+
 function monsterFor(monsterId) {
   return MONSTERS.find((monster) => monster.id === monsterId)
 }
@@ -125,6 +152,7 @@ export default function App() {
   const audioRef = useRef(null)
   audioRef.current ??= createAudio()
   const reducedMotion = useReducedMotion()
+  const disableLocalMultiplayer = useMediaQuery('(max-width: 767px)')
   const startMatch = useCallback(() => dispatch({ type: 'start-match' }), [])
   const returnHome = useCallback(() => dispatch({ type: 'home' }), [])
   const finishMatch = useCallback((match) => {
@@ -140,7 +168,9 @@ export default function App() {
       <HomeScreen
         phase={state.phase}
         muted={muted}
+        disableLocalMultiplayer={disableLocalMultiplayer}
         onChooseMode={(mode) => {
+          if (mode === 'local' && disableLocalMultiplayer) return
           audioRef.current.unlock(muted)
           dispatch({ type: 'choose-mode', mode, monsterId: loadLastMonster() })
         }}

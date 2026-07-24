@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { MONSTERS } from '../game/roster.js'
 import ModalBoundary from './ModalBoundary.jsx'
 import MonsterFigure from './MonsterFigure.jsx'
@@ -30,6 +30,7 @@ function HowToPlayDialog({ onClose }) {
 export default function HomeScreen({
   phase,
   muted,
+  disableLocalMultiplayer = false,
   onChooseMode,
   onChooseDifficulty,
   onBack,
@@ -98,9 +99,13 @@ export default function HomeScreen({
             <span>1 Player</span>
             <small>Take on the laptop</small>
           </button>
-          <button type="button" onClick={() => onChooseMode('local')}>
+          <button
+            type="button"
+            disabled={disableLocalMultiplayer}
+            onClick={() => onChooseMode('local')}
+          >
             <span>2 Players</span>
-            <small>Share this court</small>
+            <small>{disableLocalMultiplayer ? 'Desktop only for now' : 'Share this court'}</small>
           </button>
         </div>
         <button className="button button--quiet" type="button" onClick={() => setShowHelp(true)}>
